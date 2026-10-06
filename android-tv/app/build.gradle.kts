@@ -15,7 +15,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kvideo.tv"
+        applicationId = "com.djjk.ziqidonglai.tv"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

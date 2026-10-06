@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">KVideo</string>
+    <string name="app_name">紫气东来影院</string>
     <string name="setup_title">连接你的 KVideo</string>
     <string name="setup_description">首次使用时输入你的 KVideo 部署地址。保存后，APK 会记住这个地址，后续可直接打开。</string>
     <string name="setup_hint">https://example.com</string>

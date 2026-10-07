@@ -102,6 +102,8 @@ class MainActivity : ComponentActivity() {
                 cacheMode = WebSettings.LOAD_DEFAULT
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 databaseEnabled = true
+                // 注入 Android TV UA, 让 KVideo 前端 TV detection 命中 (TCL/小米/海信等非 Google TV 也覆盖)
+                userAgentString = settings.userAgentString + " Android TV"
             }
 
             webViewClient = WebViewClient()

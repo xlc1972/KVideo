@@ -153,7 +153,7 @@ class MainActivity : ComponentActivity() {
             urlInput.setText(configuredUrl)
             loadConfiguredUrl(configuredUrl)
             // 自动更新检查: 延迟启动, 不与首屏渲染抢资源
-            appUpdater.scheduleStartupCheck(configuredUrl)
+            appUpdater.scheduleStartupCheck()
         } else {
             showSetup(getString(R.string.status_first_launch))
         }
@@ -213,7 +213,7 @@ class MainActivity : ComponentActivity() {
         if (::appUpdater.isInitialized) {
             val url = getConfiguredUrl()
             if (url.isNotBlank()) {
-                appUpdater.checkForUpdate(url, silent = true)
+                appUpdater.checkForUpdate(silent = true)
             }
         }
     }

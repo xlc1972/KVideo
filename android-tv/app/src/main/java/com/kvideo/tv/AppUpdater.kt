@@ -12,11 +12,13 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * APK 自动更新协调器。
+ * APK 自动更新协调器 —— 极简版。
  *
- * 触发时机: 启动后延迟 + 每次回到前台 (onResume), 但同一版本只提示一次。
+ * 流程: 读 {APK_HOST}/ziqidonglai/version.txt 里的 versionCode
+ *       -> 比对本机 versionCode
+ *       -> 有新版则提示 -> 下载 {APK_HOST}/ziqidonglai/latest.apk -> 安装
  *
- * 失败回退: 检查失败 / 下载失败 / 校验失败 一律不阻塞使用, 旧版本继续跑。
+ * 失败回退: 检查失败 / 下载失败 一律不阻塞使用, 旧版本继续跑。
  */
 class AppUpdater(private val activity: MainActivity) {
 
@@ -25,7 +27,11 @@ class AppUpdater(private val activity: MainActivity) {
         private const val PREFS_NAME = "kvideo_tv_settings"
         private const val PREF_LAST_SEEN_VERSION = "last_seen_update_version"
         private const val CHECK_DELAY_MS = 4000L
-        private const val UPDATE_PATH = "/api/tv-update"
+
+        /** APK 托管目录 (与网站分离, 避免 build 风险) */
+        const val APK_BASE = "http://106.15.153.201/ziqidonglai"
+        const val VERSION_FILE = "$APK_BASE/version.txt"
+        const val APK_FILE = "$APK_BASE/latest.apk"
     }
 
     private val prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -36,9 +42,8 @@ class AppUpdater(private val activity: MainActivity) {
      * 启动后延迟检查 (给 WebView 一点时间先出内容, 避免和首屏渲染抢资源)。
      */
     fun scheduleStartupCheck(serverUrl: String) {
-        if (serverUrl.isBlank()) return
         activity.window.decorView.postDelayed({
-            checkForUpdate(serverUrl, silent = true)
+            checkForUpdate(silent = true)
         }, CHECK_DELAY_MS)
     }
 
@@ -48,20 +53,17 @@ class AppUpdater(private val activity: MainActivity) {
      * @param silent true = 无更新时静默; 有更新时弹窗
      * @return 检查是否成功发起
      */
-    fun checkForUpdate(serverUrl: String, silent: Boolean = false): Boolean {
+    fun checkForUpdate(silent: Boolean = false): Boolean {
         if (checking) return false
-        val base = serverUrl.trimEnd('/')
-        if (base.isBlank()) return false
-
         checking = true
         Thread {
             try {
-                val info = fetchUpdateInfo(base)
+                val info = fetchUpdateInfo()
                 if (info == null) {
-                    Log.i(TAG, "no update info from $base$UPDATE_PATH")
+                    Log.i(TAG, "no update info from $VERSION_FILE")
                     if (!silent) activity.toast(activity.getString(R.string.update_check_failed))
                 } else if (info.versionCode <= currentVersionCode()) {
-                    Log.i(TAG, "already up to date: ${info.version}")
+                    Log.i(TAG, "already up to date: ${info.versionName}")
                     if (!silent) activity.toast(activity.getString(R.string.update_already_latest))
                 } else {
                     activity.runOnUiThread { promptUpdate(info) }
@@ -86,41 +88,39 @@ class AppUpdater(private val activity: MainActivity) {
         }
     }
 
-    private fun fetchUpdateInfo(base: String): UpdateInfo? {
-        val conn = (URL(base + UPDATE_PATH).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 10000
-            readTimeout = 10000
+    private fun fetchUpdateInfo(): UpdateInfo? {
+        val conn = (URL(VERSION_FILE).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 8000
+            readTimeout = 8000
             requestMethod = "GET"
             setRequestProperty("User-Agent", "KVideo-AndroidTV-Updater")
         }
         try {
             if (conn.responseCode != HttpURLConnection.HTTP_OK) {
-                Log.w(TAG, "update endpoint HTTP ${conn.responseCode}")
+                Log.w(TAG, "version.txt HTTP ${conn.responseCode}")
                 return null
             }
             val body = conn.inputStream.bufferedReader().use { it.readText() }
-            return UpdateInfo.fromJson(body)
+            return UpdateInfo.parseVersionFile(body, APK_FILE)
         } finally {
             conn.disconnect()
         }
     }
 
     private fun promptUpdate(info: UpdateInfo) {
-        val notes = if (info.notes.isNotBlank()) "\n\n${info.notes}" else ""
-        val message = activity.getString(R.string.update_available, info.version) + notes
-        val alreadyShown = prefs.getString(PREF_LAST_SEEN_VERSION, "") == info.version
-
-        if (alreadyShown && !info.mandatory) {
-            // 同一版本已提示过, 不重复打扰 (但仍提供手动检查入口)
+        val message = activity.getString(R.string.update_available, info.versionName)
+        val alreadyShown = prefs.getInt(PREF_LAST_SEEN_VERSION, 0) == info.versionCode
+        if (alreadyShown) {
+            // 同一版本已提示过, 不重复打扰
             return
         }
 
         AlertDialog.Builder(activity)
             .setTitle(R.string.update_title)
             .setMessage(message)
-            .setCancelable(!info.mandatory)
+            .setCancelable(true)
             .setPositiveButton(R.string.update_now) { _, _ ->
-                prefs.edit().putString(PREF_LAST_SEEN_VERSION, info.version).apply()
+                prefs.edit().putInt(PREF_LAST_SEEN_VERSION, info.versionCode).apply()
                 startDownload(info)
             }
             .setNegativeButton(R.string.update_later) { _, _ -> }
@@ -165,7 +165,7 @@ class AppUpdater(private val activity: MainActivity) {
         })
 
         progressDialog.show()
-        downloader?.start(info.url, info.sha256, downloadDir)
+        downloader?.start(info.url, null, downloadDir)
     }
 
     private fun installApk(file: File, info: UpdateInfo) {
@@ -182,7 +182,7 @@ class AppUpdater(private val activity: MainActivity) {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             activity.startActivity(intent)
-            activity.toast(activity.getString(R.string.update_install_started, info.version))
+            activity.toast(activity.getString(R.string.update_install_started, info.versionName))
         } catch (e: Exception) {
             Log.e(TAG, "install failed", e)
             activity.toast(activity.getString(R.string.update_install_failed, e.message ?: ""))

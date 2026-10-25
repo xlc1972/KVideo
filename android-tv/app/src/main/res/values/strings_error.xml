@@ -1,0 +1,15 @@
+<resources>
+    <!-- 电视端诊断: 加载失败 / 白屏时的可见提示 -->
+    <string name="error_title">页面加载失败</string>
+    <string name="error_retry">重试</string>
+    <string name="error_wall">电视墙</string>
+    <string name="error_settings">设置地址</string>
+    <string name="error_hint">如果重试无效，可按遥控器「菜单」键查看诊断信息，或切换到「电视墙」使用原生界面。</string>
+    <string name="error_detail_format">URL: %1$s
+错误: %2$s
+UA: %3$s</string>
+    <string name="debug_title">诊断信息</string>
+    <string name="debug_close">关闭</string>
+    <string name="debug_copy">复制到剪贴板</string>
+    <string name="debug_copied">诊断信息已复制</string>
+</resources>

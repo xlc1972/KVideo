@@ -1,0 +1,260 @@
+-- Merging decision tree log ---
+provider#androidx.core.content.FileProvider
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:51:9-59:20
+	android:grantUriPermissions
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:55:13-47
+	android:authorities
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:53:13-64
+	android:exported
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:54:13-37
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:52:13-62
+manifest
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:2:1-61:12
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:2:1-61:12
+MERGED from [androidx.activity:activity:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\983b9aa0592007ff29f16692a4ee29ef\transformed\activity-1.8.2\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity-ktx:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\42f3ba6d5462602f69ef9d7618eb2f4b\transformed\activity-ktx-1.8.2\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.webkit:webkit:1.9.0] C:\Users\32400\.gradle\caches\transforms-3\fa22e6cf4c3d13bbd0ad9604aee08848\transformed\webkit-1.9.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\81daf44cc8a2321bfe4abd779bde9cbb\transformed\savedstate-ktx-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\15ac6c2fc90b7fde5da8d10f11d05bd8\transformed\savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\fdcd7d53bf216a26c65d81bbad81ce56\transformed\lifecycle-livedata-core-2.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\3be16fa8fb076e4b32621789f172163d\transformed\lifecycle-viewmodel-2.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\724a0c566eed743a375e662f7edad3ef\transformed\lifecycle-runtime-2.6.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\586bf6bac946ba5ade5e77605a8eee32\transformed\lifecycle-viewmodel-ktx-2.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\852450644eb2d5e074b58ee5230b26fa\transformed\lifecycle-runtime-ktx-2.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\6b29c2591da7cca343b2ebf46329161c\transformed\lifecycle-viewmodel-savedstate-2.6.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\d240b57661c0672daf098c859fa18e59\transformed\core-ktx-1.12.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\d1430f051991625ceb34d55669e1cca4\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\4615ca5c75d9c533167b1a2e6ce67a7f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\73956033c7f185dcfec97e48ae19337e\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\012d3f1f698a887e863d792dd01eaf5b\transformed\tracing-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\32400\.gradle\caches\transforms-3\cda20a725d3cf91b77662a1f4b0b7009\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
+	package
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+	xmlns:tools
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:3:5-51
+	android:versionCode
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:2:11-69
+uses-permission#android.permission.REQUEST_INSTALL_PACKAGES
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:6:5-83
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:6:22-80
+uses-permission#android.permission.INTERNET
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:7:5-67
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:7:22-64
+uses-feature#android.software.leanback
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:9:5-11:36
+	android:required
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:11:9-33
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:10:9-49
+uses-feature#android.hardware.touchscreen
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:13:5-15:36
+	android:required
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:15:9-33
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:14:9-52
+application
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:17:5-60:19
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:17:5-60:19
+MERGED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:28:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\4615ca5c75d9c533167b1a2e6ce67a7f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\4615ca5c75d9c533167b1a2e6ce67a7f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+	android:extractNativeLibs
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+	android:supportsRtl
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:24:9-35
+	android:label
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:22:9-41
+	android:hardwareAccelerated
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:20:9-43
+	android:roundIcon
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:23:9-48
+	tools:targetApi
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:27:9-29
+	android:icon
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:21:9-43
+	android:allowBackup
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:18:9-35
+	android:banner
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:19:9-45
+	android:theme
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:25:9-40
+	android:usesCleartextTraffic
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:26:9-44
+activity#com.kvideo.tv.MainActivity
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:29:9-48:20
+	android:screenOrientation
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:33:13-50
+	android:windowSoftInputMode
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:35:13-55
+	android:exported
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:32:13-36
+	android:supportsPictureInPicture
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:34:13-52
+	android:configChanges
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:31:13-106
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:30:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LEANBACK_LAUNCHER
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:38:13-41:29
+action#android.intent.action.MAIN
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:17-69
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:25-66
+category#android.intent.category.LEANBACK_LAUNCHER
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:40:17-86
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:40:27-83
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:44:13-47:29
+category#android.intent.category.LAUNCHER
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:46:17-77
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:46:27-74
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:56:13-58:54
+	android:resource
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:58:17-51
+	android:name
+		ADDED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:57:17-67
+uses-sdk
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+MERGED from [androidx.activity:activity:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\983b9aa0592007ff29f16692a4ee29ef\transformed\activity-1.8.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\983b9aa0592007ff29f16692a4ee29ef\transformed\activity-1.8.2\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\42f3ba6d5462602f69ef9d7618eb2f4b\transformed\activity-ktx-1.8.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.8.2] C:\Users\32400\.gradle\caches\transforms-3\42f3ba6d5462602f69ef9d7618eb2f4b\transformed\activity-ktx-1.8.2\AndroidManifest.xml:5:5-44
+MERGED from [androidx.webkit:webkit:1.9.0] C:\Users\32400\.gradle\caches\transforms-3\fa22e6cf4c3d13bbd0ad9604aee08848\transformed\webkit-1.9.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.webkit:webkit:1.9.0] C:\Users\32400\.gradle\caches\transforms-3\fa22e6cf4c3d13bbd0ad9604aee08848\transformed\webkit-1.9.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\81daf44cc8a2321bfe4abd779bde9cbb\transformed\savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\81daf44cc8a2321bfe4abd779bde9cbb\transformed\savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\15ac6c2fc90b7fde5da8d10f11d05bd8\transformed\savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\32400\.gradle\caches\transforms-3\15ac6c2fc90b7fde5da8d10f11d05bd8\transformed\savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\fdcd7d53bf216a26c65d81bbad81ce56\transformed\lifecycle-livedata-core-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\fdcd7d53bf216a26c65d81bbad81ce56\transformed\lifecycle-livedata-core-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\3be16fa8fb076e4b32621789f172163d\transformed\lifecycle-viewmodel-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\3be16fa8fb076e4b32621789f172163d\transformed\lifecycle-viewmodel-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\724a0c566eed743a375e662f7edad3ef\transformed\lifecycle-runtime-2.6.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\724a0c566eed743a375e662f7edad3ef\transformed\lifecycle-runtime-2.6.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\586bf6bac946ba5ade5e77605a8eee32\transformed\lifecycle-viewmodel-ktx-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\586bf6bac946ba5ade5e77605a8eee32\transformed\lifecycle-viewmodel-ktx-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\852450644eb2d5e074b58ee5230b26fa\transformed\lifecycle-runtime-ktx-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\852450644eb2d5e074b58ee5230b26fa\transformed\lifecycle-runtime-ktx-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\6b29c2591da7cca343b2ebf46329161c\transformed\lifecycle-viewmodel-savedstate-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] C:\Users\32400\.gradle\caches\transforms-3\6b29c2591da7cca343b2ebf46329161c\transformed\lifecycle-viewmodel-savedstate-2.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\d240b57661c0672daf098c859fa18e59\transformed\core-ktx-1.12.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\d240b57661c0672daf098c859fa18e59\transformed\core-ktx-1.12.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\d1430f051991625ceb34d55669e1cca4\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\d1430f051991625ceb34d55669e1cca4\transformed\annotation-experimental-1.3.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\4615ca5c75d9c533167b1a2e6ce67a7f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\4615ca5c75d9c533167b1a2e6ce67a7f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\73956033c7f185dcfec97e48ae19337e\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\73956033c7f185dcfec97e48ae19337e\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\012d3f1f698a887e863d792dd01eaf5b\transformed\tracing-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\32400\.gradle\caches\transforms-3\012d3f1f698a887e863d792dd01eaf5b\transformed\tracing-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\32400\.gradle\caches\transforms-3\cda20a725d3cf91b77662a1f4b0b7009\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\32400\.gradle\caches\transforms-3\cda20a725d3cf91b77662a1f4b0b7009\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+	android:targetSdkVersion
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+permission#com.djjk.ziqidonglai.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+uses-permission#com.djjk.ziqidonglai.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\32400\.gradle\caches\transforms-3\c81c4a461a30fb5231ba36a4a83e3fef\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:25:13-67
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92

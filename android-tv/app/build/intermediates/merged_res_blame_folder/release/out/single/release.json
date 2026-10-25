@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.kvideo.tv.app-main-22:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/layout_activity_main.xml.flat",
+        "source": "com.kvideo.tv.app-main-22:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/xml_file_paths.xml.flat",
+        "source": "com.kvideo.tv.app-main-22:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.kvideo.tv.app-main-22:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/layout_view_load_error.xml.flat",
+        "source": "com.kvideo.tv.app-main-22:/layout/view_load_error.xml"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.kvideo.tv.app-main-22:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.kvideo.tv.app-main-22:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/drawable_tv_banner.xml.flat",
+        "source": "com.kvideo.tv.app-main-22:/drawable/tv_banner.xml"
+    },
+    {
+        "merged": "com.kvideo.tv.app-merged_res-21:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.kvideo.tv.app-main-22:/mipmap-xxhdpi/ic_launcher.png"
+    }
+]

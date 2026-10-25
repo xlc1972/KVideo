@@ -42,3 +42,6 @@ next-env.d.ts
 
 # unused/generated files
 contrast-test-results.json
+
+# local
+android-tv/local.properties

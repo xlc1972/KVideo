@@ -1,0 +1,178 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.djjk.ziqidonglai.tv"
+4    android:versionCode="21"
+5    android:versionName="4.9.21" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <!-- APK 自更新: 允许请求安装未知来源应用 -->
+12    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+12-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:6:5-83
+12-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:6:22-80
+13    <uses-permission android:name="android.permission.INTERNET" />
+13-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:7:5-67
+13-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:7:22-64
+14
+15    <uses-feature
+15-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:9:5-11:36
+16        android:name="android.software.leanback"
+16-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:10:9-49
+17        android:required="false" />
+17-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:11:9-33
+18    <uses-feature
+18-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:13:5-15:36
+19        android:name="android.hardware.touchscreen"
+19-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:14:9-52
+20        android:required="false" />
+20-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:15:9-33
+21
+22    <permission
+22-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+23        android:name="com.djjk.ziqidonglai.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.djjk.ziqidonglai.tv.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+27
+28    <application
+28-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:17:5-60:19
+29        android:allowBackup="true"
+29-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:18:9-35
+30        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+30-->[androidx.core:core:1.12.0] C:\Users\32400\.gradle\caches\transforms-3\276f2db0900980727df8947f2144a96e\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+31        android:banner="@drawable/tv_banner"
+31-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:19:9-45
+32        android:extractNativeLibs="false"
+33        android:hardwareAccelerated="true"
+33-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:20:9-43
+34        android:icon="@mipmap/ic_launcher"
+34-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:21:9-43
+35        android:label="@string/app_name"
+35-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:22:9-41
+36        android:roundIcon="@mipmap/ic_launcher"
+36-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:23:9-48
+37        android:supportsRtl="true"
+37-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:24:9-35
+38        android:theme="@style/AppTheme"
+38-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:25:9-40
+39        android:usesCleartextTraffic="true" >
+39-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:26:9-44
+40        <activity
+40-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:29:9-48:20
+41            android:name="com.kvideo.tv.MainActivity"
+41-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:30:13-41
+42            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize"
+42-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:31:13-106
+43            android:exported="true"
+43-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:32:13-36
+44            android:screenOrientation="landscape"
+44-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:33:13-50
+45            android:supportsPictureInPicture="true"
+45-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:34:13-52
+46            android:windowSoftInputMode="adjustResize" >
+46-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:35:13-55
+47
+48            <!-- Leanback launcher (Android TV home) -->
+49            <intent-filter>
+49-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:38:13-41:29
+50                <action android:name="android.intent.action.MAIN" />
+50-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:17-69
+50-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:25-66
+51
+52                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+52-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:40:17-86
+52-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:40:27-83
+53            </intent-filter>
+54
+55            <!-- Standard launcher fallback -->
+56            <intent-filter>
+56-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:44:13-47:29
+57                <action android:name="android.intent.action.MAIN" />
+57-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:17-69
+57-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:39:25-66
+58
+59                <category android:name="android.intent.category.LAUNCHER" />
+59-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:46:17-77
+59-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:46:27-74
+60            </intent-filter>
+61        </activity>
+62
+63        <!-- APK 自更新: 授予安装器读取下载文件的权限 -->
+64        <provider
+65            android:name="androidx.core.content.FileProvider"
+65-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:52:13-62
+66            android:authorities="com.djjk.ziqidonglai.tv.fileprovider"
+66-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:53:13-64
+67            android:exported="false"
+67-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:54:13-37
+68            android:grantUriPermissions="true" >
+68-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:55:13-47
+69            <meta-data
+69-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:56:13-58:54
+70                android:name="android.support.FILE_PROVIDER_PATHS"
+70-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:57:17-67
+71                android:resource="@xml/file_paths" />
+71-->C:\Users\32400\kvideo-fork\android-tv\app\src\main\AndroidManifest.xml:58:17-51
+72        </provider>
+73        <provider
+73-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
+74            android:name="androidx.startup.InitializationProvider"
+74-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:25:13-67
+75            android:authorities="com.djjk.ziqidonglai.tv.androidx-startup"
+75-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:26:13-68
+76            android:exported="false" >
+76-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:27:13-37
+77            <meta-data
+77-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+78                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+78-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+79                android:value="androidx.startup" />
+79-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+80        </provider>
+81
+82        <receiver
+82-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+83            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+83-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+84            android:directBootAware="false"
+84-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+85            android:enabled="true"
+85-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+86            android:exported="true"
+86-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+87            android:permission="android.permission.DUMP" >
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+88            <intent-filter>
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+89                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+89-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+89-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+90            </intent-filter>
+91            <intent-filter>
+91-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+92                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+93            </intent-filter>
+94            <intent-filter>
+94-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+95                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+96            </intent-filter>
+97            <intent-filter>
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+98                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\32400\.gradle\caches\transforms-3\3fa23f723baba475bcd0b2a0a7442dec\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+99            </intent-filter>
+100        </receiver>
+101    </application>
+102
+103</manifest>

@@ -18,7 +18,7 @@ data class UpdateInfo(
          * 宽松解析 version.txt: 取第一个整数, 失败返回 null。
          */
         fun parseVersionFile(content: String, apkUrl: String): UpdateInfo? {
-            val code = content.trim().lines
+            val code = content.trim().lines()
                 .mapNotNull { line ->
                     Regex("\\d+").find(line)?.value?.toIntOrNull()
                 }

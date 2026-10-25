@@ -41,7 +41,7 @@ class AppUpdater(private val activity: MainActivity) {
     /**
      * 启动后延迟检查 (给 WebView 一点时间先出内容, 避免和首屏渲染抢资源)。
      */
-    fun scheduleStartupCheck(serverUrl: String) {
+    fun scheduleStartupCheck() {
         activity.window.decorView.postDelayed({
             checkForUpdate(silent = true)
         }, CHECK_DELAY_MS)

@@ -45,7 +45,7 @@ class UpdateDownloader(private val callback: Callback) {
     /**
      * 在后台线程执行下载。
      */
-    fun start(downloadUrl: String, expectedSha256: String, targetDir: File) {
+    fun start(downloadUrl: String, expectedSha256: String?, targetDir: File) {
         Thread {
             try {
                 val result = download(downloadUrl, expectedSha256, targetDir)
@@ -65,7 +65,7 @@ class UpdateDownloader(private val callback: Callback) {
         data class Failure(val reason: String, val retryable: Boolean) : Result()
     }
 
-    private fun download(url: String, expectedSha256: String, targetDir: File): Result {
+    private fun download(url: String, expectedSha256: String?, targetDir: File): Result {
         if (!targetDir.exists() && !targetDir.mkdirs()) {
             return Result.Failure("cannot create download dir", false)
         }
@@ -136,7 +136,7 @@ class UpdateDownloader(private val callback: Callback) {
                 }
 
                 // SHA256 校验 (服务端提供则必须一致)
-                if (expectedSha256.isNotBlank()) {
+                if (!expectedSha256.isNullOrBlank()) {
                     val actual = sha256(tmpFile)
                     if (!actual.equals(expectedSha256, ignoreCase = true)) {
                         tmpFile.delete()

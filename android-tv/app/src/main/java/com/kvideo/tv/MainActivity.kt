@@ -3,6 +3,7 @@ package com.kvideo.tv
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.widget.Toast
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private var customView: View? = null
     private var customViewCallback: CustomViewCallback? = null
     private var wasSetupVisibleBeforeFullscreen = false
+    private lateinit var appUpdater: AppUpdater
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -144,10 +146,14 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(AndroidPlayerBridge(), "KVideoAndroid")
         }
 
+        appUpdater = AppUpdater(this)
+
         val configuredUrl = getConfiguredUrl()
         if (configuredUrl.isNotEmpty()) {
             urlInput.setText(configuredUrl)
             loadConfiguredUrl(configuredUrl)
+            // 自动更新检查: 延迟启动, 不与首屏渲染抢资源
+            appUpdater.scheduleStartupCheck(configuredUrl)
         } else {
             showSetup(getString(R.string.status_first_launch))
         }
@@ -203,6 +209,13 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         applyImmersiveMode()
+        // 回到前台时再检查一次更新 (静默, 同版本不重复提示)
+        if (::appUpdater.isInitialized) {
+            val url = getConfiguredUrl()
+            if (url.isNotBlank()) {
+                appUpdater.checkForUpdate(url, silent = true)
+            }
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -227,6 +240,12 @@ class MainActivity : ComponentActivity() {
         exitCustomFullscreen()
         webView.destroy()
         super.onDestroy()
+    }
+
+    fun toast(msg: String) {
+        runOnUiThread {
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun openConfiguredUrl() {

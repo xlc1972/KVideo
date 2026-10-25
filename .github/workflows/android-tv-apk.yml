@@ -49,17 +49,36 @@ jobs:
       - name: Install Android SDK packages
         run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
+      - name: Restore release signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning::no release keystore secret, falling back to debug signing"
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/keystore"
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/keystore/release.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/keystore/release.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASS" >> "$GITHUB_ENV"
+          echo "keystore restored"
+
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug -PkvideoUrl="$KVIDEO_URL"
+      - name: Build release APK
+        run: ./gradlew --no-daemon assembleRelease -PkvideoUrl="$KVIDEO_URL"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: kvideo-android-tv-apk
-          path: android-tv/app/build/outputs/apk/debug/app-debug.apk
+          path: android-tv/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: Publish GitHub release
@@ -87,10 +106,10 @@ jobs:
           EOF
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "android-tv/app/build/outputs/apk/debug/app-debug.apk#KVideo-AndroidTV.apk" --clobber
+            gh release upload "$RELEASE_TAG" "android-tv/app/build/outputs/apk/release/app-release.apk#KVideo-AndroidTV.apk" --clobber
             gh release edit "$RELEASE_TAG" --title "$effective_title" --notes-file "$release_notes"
           else
-            gh release create "$RELEASE_TAG" "android-tv/app/build/outputs/apk/debug/app-debug.apk#KVideo-AndroidTV.apk" \
+            gh release create "$RELEASE_TAG" "android-tv/app/build/outputs/apk/release/app-release.apk#KVideo-AndroidTV.apk" \
               --title "$effective_title" \
               --notes-file "$release_notes" \
               --target "$GITHUB_SHA"

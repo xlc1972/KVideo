@@ -797,7 +797,7 @@ class MainActivity : ComponentActivity() {
                 // getSystemService(Class) 是 API 23 才有的重载;
                 // API 21-22 只有 getSystemService(String) 版本。
                 @Suppress("DEPRECATION")
-                val clip = getSystemService(android.content.ClipboardManager::class.java.name)
+                val clip = getSystemService(android.content.Context.CLIPBOARD_SERVICE)
                     as? android.content.ClipboardManager
                 clip?.setPrimaryClip(android.content.ClipData.newPlainText("kvideo-debug", info))
                 toast(getString(R.string.debug_copied))

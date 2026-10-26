@@ -42,7 +42,7 @@ class NativePlayerBridgeContractTest {
         val hls = PlaybackUrlResolver.resolve("https://cdn.example.com/a/master.m3u8")
         assertTrue(hls is PlaybackUrlResolver.Resolution.Native)
 
-        // 代理地址 -> 解包后仍交给原生
+        // 代理地址 -> 保留代理交给原生，不能绕过服务器
         val real = "https://cdn.example.com/a/master.m3u8"
         val encoded = java.net.URLEncoder.encode(real, "UTF-8")
         val proxied = PlaybackUrlResolver.resolve(
@@ -51,7 +51,7 @@ class NativePlayerBridgeContractTest {
         )
         assertTrue(proxied is PlaybackUrlResolver.Resolution.Native)
         require(proxied is PlaybackUrlResolver.Resolution.Native)
-        assertEquals(real, proxied.url)
+        assertEquals("https://kvideo.djjk.cc/api/proxy?url=$encoded&retry=0", proxied.url)
 
         // 需要页面上下文 -> 留在 WebView
         assertTrue(

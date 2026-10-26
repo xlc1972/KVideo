@@ -133,11 +133,8 @@ class UpdateCheckerTest {
     }
 
     @Test
-    fun `default sources cover both 182 and 106`() {
-        val names = UpdateChecker.DEFAULT_SOURCES.map { it.name }
-        assertTrue(names.contains("182-api"))
-        assertTrue(names.contains("106-version"))
-        // 182 优先
-        assertEquals("182-api", UpdateChecker.DEFAULT_SOURCES.first().name)
+    fun `default update source uses only the primary server`() {
+        assertEquals(1, UpdateChecker.DEFAULT_SOURCES.size)
+        assertEquals(src182, UpdateChecker.DEFAULT_SOURCES.single())
     }
 }

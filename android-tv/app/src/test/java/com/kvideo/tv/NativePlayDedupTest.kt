@@ -62,7 +62,7 @@ class NativePlayDedupTest {
             "https://kvideo.djjk.cc"
         )
         require(r is PlaybackUrlResolver.Resolution.Native)
-        assertEquals(real, r.url)
+        assertEquals("https://kvideo.djjk.cc/api/proxy?url=$encoded&retry=0", r.url)
         assertTrue(r.isHls)
     }
 }

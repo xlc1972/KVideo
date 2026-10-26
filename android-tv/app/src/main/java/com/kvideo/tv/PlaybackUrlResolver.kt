@@ -7,7 +7,7 @@ import java.net.URI
  *
  * 背景: 站点的播放页 (WebView) 里有多个源, 每个源给出不同的播放地址:
  *  - HLS 主清单 (.m3u8)          -> 原生 Media3 直连, 兼容性最好
- *  - HLS 带代理重写 (…/api/proxy?url=…) -> 也交给 Media3, 但需要先解出真实地址
+ *  - HLS 带代理重写 (…/api/proxy?url=…) -> 也交给 Media3；仅解码识别类型，不绕过代理
  *  - 直链 mp4 / flv 等           -> Media3 渐进式源
  *  - 需要页面上下文才能播的地址   -> 留在 WebView
  *
@@ -54,10 +54,12 @@ object PlaybackUrlResolver {
             return Resolution.WebView
         }
 
-        // 代理重写地址: /api/proxy?url=<encoded real url>
+        // 只解码目标来识别媒体类型，实际请求必须保留代理地址。
+        // 否则电视会绕过服务器的 Referer/网络适配，和网页走不同的播放链路。
         val proxied = extractProxiedTarget(absolute)
         if (proxied != null) {
-            return resolve(proxied, siteBase)
+            val target = resolve(proxied, siteBase)
+            return if (target is Resolution.Native) target.copy(url = absolute) else target
         }
 
         val path = absolute.substringBefore('?').lowercase()
@@ -65,7 +67,7 @@ object PlaybackUrlResolver {
             path.endsWith(".m3u8") -> Resolution.Native(absolute, isHls = true)
             path.endsWith(".mp4") -> Resolution.Native(absolute, isHls = false)
             path.endsWith(".webm") -> Resolution.Native(absolute, isHls = false)
-            path.endsWith(".mpd") -> Resolution.Native(absolute, isHls = true)  // DASH 走 HLS 工厂会失败, 交由渐进式兜底
+            path.endsWith(".mpd") -> Resolution.WebView // 未配置 DASH 工厂，不能误送入 HLS
             path.endsWith(".flv") -> Resolution.Native(absolute, isHls = false)
             path.endsWith(".ts") -> Resolution.Native(absolute, isHls = false)
             else -> Resolution.WebView

@@ -140,7 +140,7 @@ class PlayerActivity : android.app.Activity() {
         url: String,
         dataSourceFactory: DefaultDataSource.Factory
     ): MediaSource {
-        val isHls = url.substringBefore('?').lowercase().endsWith(".m3u8")
+        val isHls = (PlaybackUrlResolver.resolve(url) as? PlaybackUrlResolver.Resolution.Native)?.isHls == true
         return if (isHls) {
             HlsMediaSource.Factory(dataSourceFactory)
                 .setAllowChunklessPreparation(true)

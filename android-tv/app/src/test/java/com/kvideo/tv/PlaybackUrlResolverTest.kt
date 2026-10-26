@@ -48,15 +48,39 @@ class PlaybackUrlResolverTest {
     }
 
     @Test
-    fun `proxy url is unwrapped to the real target`() {
+    fun `proxy hls keeps the server url instead of bypassing it`() {
         val real = "https://cdn.example.com/x/master.m3u8"
         val encoded = java.net.URLEncoder.encode(real, "UTF-8")
         val proxied = "$base/api/proxy?url=$encoded&retry=0"
 
         val r = PlaybackUrlResolver.resolve(proxied, base)
         require(r is PlaybackUrlResolver.Resolution.Native)
-        assertEquals(real, r.url)
+        assertEquals(proxied, r.url)
         assertTrue(r.isHls)
+    }
+
+    @Test
+    fun `relative proxy hls retains absolute server url`() {
+        val encoded = java.net.URLEncoder.encode("https://cdn.example.com/a.m3u8?token=a+b", "UTF-8")
+        val path = "/api/proxy?url=$encoded"
+        val r = PlaybackUrlResolver.resolve(path, base)
+        require(r is PlaybackUrlResolver.Resolution.Native)
+        assertEquals(base + path, r.url)
+        assertTrue(r.isHls)
+    }
+
+    @Test
+    fun `proxy mp4 retains proxy and progressive type`() {
+        val proxy = "$base/api/proxy?url=https%3A%2F%2Fcdn.example.com%2Fa.mp4"
+        val r = PlaybackUrlResolver.resolve(proxy, base)
+        require(r is PlaybackUrlResolver.Resolution.Native)
+        assertEquals(proxy, r.url)
+        assertFalse(r.isHls)
+    }
+
+    @Test
+    fun `dash is not misclassified as hls`() {
+        assertTrue(PlaybackUrlResolver.resolve("https://cdn.example.com/a.mpd") is PlaybackUrlResolver.Resolution.WebView)
     }
 
     @Test

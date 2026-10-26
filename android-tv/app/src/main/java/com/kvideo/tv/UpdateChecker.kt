@@ -6,14 +6,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * 更新检查器 —— 双源策略。
- *
- * 生产上 APK 同时托管在两个地方:
- * - **182** `https://kvideo.djjk.cc/api/tv-update` (JSON, 带 sha256/size)  ← 首选
- * - **106** `http://106.15.153.201/ziqidonglai/version.txt` (纯数字)        ← 兜底
- *
- * 为什么要双源: 家庭宽带下 106 可能被运营商策略挡住, 或反之;
- * 任意一个可用就能完成更新, 两者都不可用时保持当前版本继续用。
+ * 更新检查器 —— 生产只使用 182 上的 HTTPS 更新清单。
+ * 网站、播放代理、APK 和更新清单由同一服务器承载。
+ * 更新服务不可用时保留已安装版本，不依赖第二台服务器。
+ * 注入多源与旧协议解析仍保留用于兼容测试，不是生产部署依赖。
  *
  * 纯网络 I/O, 不含状态; 便于单测 (通过注入 fetcher)。
  */
@@ -93,17 +89,12 @@ class UpdateChecker(
     companion object {
         private const val TAG = "KVideoUpdate"
 
-        /** 生产默认源: 182 优先 (有 sha256), 106 兜底 */
+        /** 唯一生产更新源，清单包含 sha256。 */
         val DEFAULT_SOURCES = listOf(
             UpdateSource(
                 name = "182-api",
                 manifestUrl = "https://kvideo.djjk.cc/api/tv-update",
                 fallbackApkUrl = null
-            ),
-            UpdateSource(
-                name = "106-version",
-                manifestUrl = "http://106.15.153.201/ziqidonglai/version.txt",
-                fallbackApkUrl = "http://106.15.153.201/ziqidonglai/latest.apk"
             )
         )
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processM3u8Content } from '@/lib/utils/proxy-utils';
 import { fetchWithRetry } from '@/lib/utils/fetch-with-retry';
+import { checkProxyTarget } from '@/lib/utils/proxy-ssrf-guard';
 import { getRuntimeFeatures } from '@/lib/server/runtime-features';
 
 export const runtime = 'edge';
@@ -72,6 +73,18 @@ export async function GET(request: NextRequest) {
 
     if (!url) {
         return new NextResponse('Missing URL parameter', { status: 400 });
+    }
+
+    // SSRF 防护: 拒绝指向内网/保留地址的目标。
+    // 站点自身会请求 /api/proxy?url=/family-sources.json 这类站点内相对地址,
+    // 那类地址不含 http(s) scheme, 由下面的 protocol 判定一并挡掉。
+    const targetCheck = checkProxyTarget(url);
+    if (!targetCheck.ok) {
+        console.warn(`[proxy] blocked target: ${targetCheck.reason} (${url.slice(0, 120)})`);
+        return new NextResponse(
+            JSON.stringify({ error: 'Proxy target not allowed', reason: targetCheck.reason }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
     }
 
     try {

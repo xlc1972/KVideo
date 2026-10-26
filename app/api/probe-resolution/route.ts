@@ -171,25 +171,62 @@ export async function POST(request: NextRequest) {
         // Process in parallel with concurrency limit
         const CONCURRENCY = 6;
         let index = 0;
+        // 客户端可能提前断开 (电视端换台/退出, nginx 记 499)。
+        // 之后 enqueue/close 会抛错, 未捕获时在 Edge runtime 里会变成
+        // uncaughtException —— 整个进程被拖垮, 无关的 API 跟着 500。
+        let cancelled = false;
+        const safeEnqueue = (chunk: Uint8Array): boolean => {
+          if (cancelled) return false;
+          try {
+            controller.enqueue(chunk);
+            return true;
+          } catch {
+            cancelled = true;
+            return false;
+          }
+        };
+        const safeClose = (): void => {
+          if (cancelled) return;
+          cancelled = true;
+          try {
+            controller.close();
+          } catch {
+            // 已被取消, 忽略
+          }
+        };
+        const safeError = (error: unknown): void => {
+          if (cancelled) return;
+          cancelled = true;
+          try {
+            controller.error(error);
+          } catch {
+            // 已被取消, 忽略
+          }
+        };
 
-        async function processNext(): Promise<void> {
-          while (index < batch.length) {
-            const current = batch[index++];
-            try {
-              const result = await probeOne(current, sourceConfigs);
-              const line = `data: ${JSON.stringify(result)}\n\n`;
-              controller.enqueue(encoder.encode(line));
-            } catch {
-              const fallback = { id: current.id, source: current.source, resolution: null, resolutionOrigin: 'manifest' };
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(fallback)}\n\n`));
+        try {
+          async function processNext(): Promise<void> {
+            while (index < batch.length && !cancelled) {
+              const current = batch[index++];
+              try {
+                const result = await probeOne(current, sourceConfigs);
+                const line = `data: ${JSON.stringify(result)}\n\n`;
+                if (!safeEnqueue(encoder.encode(line))) return;
+              } catch {
+                const fallback = { id: current.id, source: current.source, resolution: null, resolutionOrigin: 'manifest' };
+                if (!safeEnqueue(encoder.encode(`data: ${JSON.stringify(fallback)}\n\n`))) return;
+              }
             }
           }
-        }
 
-        const workers = Array.from({ length: Math.min(CONCURRENCY, batch.length) }, () => processNext());
-        await Promise.all(workers);
-        controller.enqueue(encoder.encode('data: {"done":true}\n\n'));
-        controller.close();
+          const workers = Array.from({ length: Math.min(CONCURRENCY, batch.length) }, () => processNext());
+          await Promise.all(workers);
+          if (!safeEnqueue(encoder.encode('data: {"done":true}\n\n'))) return;
+          safeClose();
+        } catch (error) {
+          console.error('[probe-resolution] stream failed', error);
+          safeError(error);
+        }
       },
     });
 

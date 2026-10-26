@@ -76,6 +76,9 @@ export async function fetchWithRetry({ url, request, headers = {} }: FetchWithRe
             lastError = fetchError;
             if (fetchError instanceof Error && fetchError.name === 'AbortError') {
                 console.warn(`⚠ Timeout on attempt ${attempt}, retrying...`);
+                // 最后一轮超时也要继续走完循环, 由循环末尾统一抛错
+                if (attempt >= MAX_RETRIES) break;
+                continue;
             } else if (attempt < MAX_RETRIES) {
                 console.warn(`⚠ Fetch error on attempt ${attempt}, retrying...`, fetchError);
             } else {
@@ -87,7 +90,11 @@ export async function fetchWithRetry({ url, request, headers = {} }: FetchWithRe
     // If we got a response (even an error response like 403, 404), return it
     // Only throw if we truly failed to get any response
     if (!response) {
-        throw new Error(`Failed after ${MAX_RETRIES} attempts: ${lastError}`);
+        // 上游断连/超时会走到这里。抛普通 Error 而不是把底层 ECONNRESET
+        // 原样抛出去 —— 在 Edge runtime 里未捕获的底层错误会变成
+        // uncaughtException 并拖垮整个进程, 让无关的 API 跟着 500。
+        const detail = lastError instanceof Error ? lastError.message : String(lastError);
+        throw new Error(`Upstream fetch failed after ${MAX_RETRIES} attempts: ${detail}`);
     }
 
     // Return the response even if it's an error status (403, 404, etc.)

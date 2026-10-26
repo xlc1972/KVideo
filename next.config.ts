@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
   env: {
     ACCESS_PASSWORD: process.env.ACCESS_PASSWORD || "",
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
-    SUBSCRIPTION_SOURCES: process.env.SUBSCRIPTION_SOURCES || '[{"name":"家庭净化片源","url":"http://127.0.0.1:13080/family-sources.json"}]',
+    // 订阅源必须是浏览器能直接访问的地址。
+    // 之前这里填的是服务器内网 http://127.0.0.1:13080/family-sources.json,
+    // 浏览器访问不到, 只能靠 /api/proxy 兜底, 而 proxy 因 SSRF 防护会拒绝内网地址。
+    // 现在指向本站自己的 /api/sources (服务端读运行时源注册表, 返回浏览器可达的地址)。
+    SUBSCRIPTION_SOURCES: process.env.SUBSCRIPTION_SOURCES || '[{"name":"紫气东来片源","url":"/api/sources"}]',
     AD_KEYWORDS_FILE: process.env.AD_KEYWORDS_FILE || "ad-keywords.txt",
     MERGE_SOURCES: process.env.MERGE_SOURCES || "true",
     IPTV_SOURCES: process.env.IPTV_SOURCES || "",

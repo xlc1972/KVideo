@@ -94,6 +94,20 @@ export const getDefaultPremiumSources = (): VideoSource[] => PREMIUM_SOURCES;
 
 
 
+/**
+ * 订阅源地址是否可以被浏览器直接 fetch。
+ *
+ * 允许 http(s) 绝对地址, 以及站内相对路径 (如 "/api/sources") ——
+ * 后者由前端用 fetch(path) 直接请求, 不经过 /api/proxy, 因此不受 SSRF 限制。
+ */
+function isFetchableSourceUrl(url: string): boolean {
+    const u = url.trim();
+    if (!u) return false;
+    if (u.startsWith('http://') || u.startsWith('https://')) return true;
+    // 站内相对路径: 必须以单个 / 开头, 拒绝 // (协议相对) 和 javascript: 之类
+    return u.startsWith('/') && !u.startsWith('//');
+}
+
 function getEnvSubscriptions(customValue?: string): SourceSubscription[] {
   const envValue = (customValue || process.env.SUBSCRIPTION_SOURCES || process.env.NEXT_PUBLIC_SUBSCRIPTION_SOURCES || '').trim();
   if (!envValue) return [];
@@ -105,6 +119,7 @@ function getEnvSubscriptions(customValue?: string): SourceSubscription[] {
       return raw
         .filter((item): item is { name: string; url: string } =>
           !!item && typeof (item as { name?: unknown }).name === 'string' && typeof (item as { url?: unknown }).url === 'string')
+        .filter((item) => isFetchableSourceUrl(item.url))
         .map((item) => createSubscription(item.name, item.url));
     }
   } catch (e) {
@@ -113,11 +128,10 @@ function getEnvSubscriptions(customValue?: string): SourceSubscription[] {
 
   // 2. Try Simple URL (or comma separated)
   // Check if it looks like a URL (basic check)
-  if (envValue.includes('http')) {
+  if (envValue.includes('http') || envValue.startsWith('/')) {
     const urls = envValue.split(',').map(u => u.trim()).filter(u => u.length > 0);
     return urls.map((url, index) => {
-      // Basic URL validation
-      if (!url.startsWith('http')) return null;
+      if (!isFetchableSourceUrl(url)) return null;
 
       const name = urls.length > 1
         ? `系统预设源 ${index + 1}`

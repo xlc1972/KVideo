@@ -5,6 +5,52 @@ import { getRuntimeFeatures } from '@/lib/server/runtime-features';
 
 export const runtime = 'edge';
 
+/**
+ * 解析对外可达的 origin (scheme://host)。
+ *
+ * 为什么需要:
+ *   Next standalone 以 Environment=HOSTNAME=0.0.0.0 启动,
+ *   request.nextUrl.origin 因此是 "http://0.0.0.0:3001" —— 内部监听地址。
+ *   用它重写 m3u8 里的分片 URL, 电视/浏览器拿到的地址无法访问,
+ *   于是视频永远停在 readyState=0, 表现为"播放端遥控无反应"。
+ *
+ * 优先用反向代理传来的头 (nginx 已设置 X-Forwarded-Proto 与 Host),
+ * 并拒绝 0.0.0.0 / localhost / 127.0.0.1 等内部地址。
+ */
+const INTERNAL_HOSTS = new Set([
+    '0.0.0.0',
+    '::',
+    'localhost',
+    '127.0.0.1',
+    '::1',
+    '0',
+]);
+
+function resolvePublicOrigin(request: NextRequest): string {
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const hostHeader = request.headers.get('host');
+    const candidateHost = (forwardedHost || hostHeader || '').split(',')[0].trim();
+
+    const forwardedProto = request.headers.get('x-forwarded-proto');
+    const proto = (forwardedProto || '').split(',')[0].trim()
+        || (request.nextUrl.protocol || 'https').replace(':', '');
+
+    if (candidateHost) {
+        // 剥掉端口后判断是否为内部地址
+        const hostname = candidateHost.startsWith('[')
+            ? candidateHost.slice(1, candidateHost.indexOf(']'))
+            : candidateHost.split(':')[0];
+
+        if (!INTERNAL_HOSTS.has(hostname.toLowerCase())) {
+            return `${proto}://${candidateHost}`;
+        }
+    }
+
+    // 头里没有可用外部地址时, 退回 nextUrl.origin
+    return request.nextUrl.origin;
+}
+
+
 // Disable SSL verification for video sources with invalid certificates
 // Note: This is not supported in Cloudflare Workers/Edge Runtime.
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -67,7 +113,7 @@ export async function GET(request: NextRequest) {
 
             // Verify it's actually M3U8 content (starts with #EXTM3U or #EXT-X-)
             if (text.trim().startsWith('#EXTM3U') || text.trim().startsWith('#EXT-X-')) {
-                const modifiedText = await processM3u8Content(text, url, request.nextUrl.origin);
+                const modifiedText = await processM3u8Content(text, url, resolvePublicOrigin(request));
 
                 return new NextResponse(modifiedText, {
                     status: response.status,

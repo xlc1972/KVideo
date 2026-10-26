@@ -4,12 +4,51 @@ import type { DanmakuComment, DanmakuSearchResult, DanmakuEpisode } from '@/lib/
  * Parse danmu_api response into normalized DanmakuComment[]
  * Handles both /api/v2/comment/{id} format and raw arrays
  */
-export function parseDanmakuResponse(data: any): DanmakuComment[] {
+/**
+ * Raw shapes returned by the danmu_api. Both the raw `p`/`m` encoding and the already
+ * normalised fields can appear, so both are described here.
+ */
+type RawDanmakuComment = {
+  p?: string;
+  m?: string;
+  text?: string;
+  time?: number;
+  type?: string;
+  color?: string;
+};
+
+type RawDanmakuResponse = {
+  comments?: RawDanmakuComment[];
+  data?: RawDanmakuComment[];
+};
+
+type RawDanmakuSearchAnime = {
+  animeId?: string | number;
+  id?: string | number;
+  animeTitle?: string;
+  title?: string;
+  episodes?: RawDanmakuEpisode[];
+};
+
+type RawDanmakuEpisode = {
+  episodeId?: string | number;
+  id?: string | number;
+  episodeTitle?: string;
+  title?: string;
+};
+
+type RawDanmakuSearchResponse = {
+  animes?: RawDanmakuSearchAnime[];
+  data?: RawDanmakuSearchAnime[];
+};
+
+export function parseDanmakuResponse(data: unknown): DanmakuComment[] {
   // The danmu_api /api/v2/comment/{id} returns { count, comments: [...] }
-  const comments = data?.comments || data?.data || (Array.isArray(data) ? data : []);
+  const payload = (data ?? {}) as RawDanmakuResponse & RawDanmakuComment[];
+  const comments: RawDanmakuComment[] = payload.comments || payload.data || (Array.isArray(payload) ? payload : []);
 
   return comments
-    .map((c: any) => {
+    .map((c: RawDanmakuComment) => {
       // danmu_api format: { p: "time,type,color", m: "text" }
       // or normalized: { time, type, color, text }
       if (c.p && c.m) {
@@ -43,14 +82,15 @@ export function parseDanmakuResponse(data: any): DanmakuComment[] {
 /**
  * Parse danmu_api search results into DanmakuSearchResult[]
  */
-export function parseSearchResults(data: any): DanmakuSearchResult[] {
-  const animes = data?.animes || data?.data || (Array.isArray(data) ? data : []);
+export function parseSearchResults(data: unknown): DanmakuSearchResult[] {
+  const payload = (data ?? {}) as RawDanmakuSearchResponse & RawDanmakuSearchAnime[];
+  const animes: RawDanmakuSearchAnime[] = payload.animes || payload.data || (Array.isArray(payload) ? payload : []);
 
-  return animes.map((a: any) => ({
-    animeId: a.animeId ?? a.id ?? '',
+  return animes.map((a: RawDanmakuSearchAnime) => ({
+    animeId: String(a.animeId ?? a.id ?? ''),
     animeTitle: a.animeTitle ?? a.title ?? '',
-    episodes: (a.episodes || []).map((ep: any) => ({
-      episodeId: ep.episodeId ?? ep.id ?? '',
+    episodes: (a.episodes || []).map((ep: RawDanmakuEpisode) => ({
+      episodeId: String(ep.episodeId ?? ep.id ?? ''),
       episodeTitle: ep.episodeTitle ?? ep.title ?? '',
     })),
   }));

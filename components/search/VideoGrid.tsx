@@ -70,10 +70,6 @@ export const VideoGrid = memo(function VideoGrid({
     return () => unsubscribe();
   }, [pathname, searchParams, videos.length]);
 
-  if (videos.length === 0) {
-    return null;
-  }
-
   // Build stable list of videos to probe for resolution
   const videosToProbe = useMemo(() => {
     if (displayMode === 'grouped') {
@@ -185,7 +181,15 @@ export const VideoGrid = memo(function VideoGrid({
   const probeList = displayMode === 'grouped' ? groupedProbeList : videosToProbe;
   const { resolutions, isProbing } = useResolutionProbe(probeList);
 
+  // 注意: 空结果提前 return 必须放在所有 Hook 之后。
+  // 若放在 Hook 之前, videos 由空变为非空时 (搜索结果异步到达),
+  // 本次渲染的 Hook 数量会少于上一次 -> React 抛
+  // "Rendered fewer hooks than expected" -> 页面崩溃/白屏。
   const totalItems = displayMode === 'grouped' ? groupItems.length : videoItems.length;
+
+  if (videos.length === 0) {
+    return null;
+  }
 
   return (
     <>

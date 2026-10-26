@@ -7,7 +7,6 @@ import {
   listAccountInfo,
 } from '@/lib/server/auth';
 
-export const runtime = 'edge';
 
 async function requireSuperAdmin(request: NextRequest) {
   const session = await getServerSession(request);

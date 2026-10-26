@@ -31,7 +31,7 @@ export function useIsIOS() {
 
     useEffect(() => {
         const checkIOS = () => {
-            const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+            const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
             setIsIOS(ios);
         };
 

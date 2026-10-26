@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { settingsStore } from '@/lib/store/settings-store';
 
-interface VideoData {
+export interface VideoData {
   vod_id: string;
   vod_name: string;
   vod_pic?: string;

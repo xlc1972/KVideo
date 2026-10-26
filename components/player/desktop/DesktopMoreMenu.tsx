@@ -68,6 +68,11 @@ export function DesktopMoreMenu({
     const menuRef = React.useRef<HTMLDivElement>(null);
     const [menuPosition, setMenuPosition] = React.useState({ top: 0, left: 0, maxHeight: 'none', openUpward: false, align: 'right' as 'left' | 'right' });
     const [isAdFilterOpen, setAdFilterOpen] = React.useState(false);
+    // Rotated-mode button width (measured in calculateMenuPosition). Kept in state so that
+    // render never reads a ref (react-hooks/refs).
+    const [rotatedButtonWidth, setRotatedButtonWidth] = React.useState(0);
+    // Portal mount target. Resolved in an effect so that render never reads containerRef.current.
+    const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
 
     const AD_FILTER_LABELS: Record<string, string> = {
         off: '关闭',
@@ -205,6 +210,8 @@ export function DesktopMoreMenu({
             const containerWidth = containerRef.current.offsetWidth;
             const containerHeight = containerRef.current.offsetHeight;
 
+            setRotatedButtonWidth(buttonWidth);
+
             // In rotated mode (90deg CW):
             // Landscape Vertical Axis = Container X Axis (left in code)
             // Landscape Horizontal Axis = Container Y Axis (top in code)
@@ -240,6 +247,12 @@ export function DesktopMoreMenu({
     }, [containerRef, isRotated, isFullscreen]);
 
 
+
+    // Resolve the portal target outside of render (refs must not be read during render).
+    React.useEffect(() => {
+        const container = containerRef.current;
+        setPortalTarget(((isRotated || isFullscreen) && container) ? container : document.body);
+    }, [containerRef, isRotated, isFullscreen, showMoreMenu]);
 
     // Auto-close menu on scroll
     React.useEffect(() => {
@@ -283,7 +296,7 @@ export function DesktopMoreMenu({
                         right: `calc(100% - ${menuPosition.left}px + 10px)`,
                         left: 'auto'
                     } : {
-                        left: `${menuPosition.left + buttonRef.current?.offsetWidth! + 10}px`,
+                        left: `${menuPosition.left + rotatedButtonWidth + 10}px`,
                         right: 'auto'
                     }),
 
@@ -649,7 +662,7 @@ export function DesktopMoreMenu({
 
             {/* More Menu Dropdown (Portal) */}
             {/* More Menu Dropdown (Portal) */}
-            {showMoreMenu && typeof document !== 'undefined' && createPortal(MenuContent, ((isRotated || isFullscreen) && containerRef.current) ? containerRef.current : document.body)}
+            {showMoreMenu && portalTarget && typeof document !== 'undefined' && createPortal(MenuContent, portalTarget)}
         </div>
     );
 }

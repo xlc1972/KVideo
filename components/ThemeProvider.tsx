@@ -1,8 +1,32 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
+
+const THEME_STORAGE_KEY = 'theme';
+
+/** Listeners notified when the persisted theme changes. */
+const themeListeners = new Set<() => void>();
+
+function readPersistedTheme(): Theme {
+  if (typeof window === 'undefined') return 'system';
+  const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system';
+}
+
+function persistTheme(theme: Theme): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  themeListeners.forEach(listener => listener());
+}
+
+function subscribeToTheme(listener: () => void): () => void {
+  themeListeners.add(listener);
+  return () => {
+    themeListeners.delete(listener);
+  };
+}
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,27 +37,27 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system');
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('dark');
-  const [mounted, setMounted] = useState(false);
-  const transitionRef = React.useRef<any>(null);
-
-  useEffect(() => {
-    setMounted(true);
-    // Load saved theme
-    const saved = localStorage.getItem('theme') as Theme;
-    if (saved) {
-      setTheme(saved);
-    }
+  const theme = useSyncExternalStore<Theme>(subscribeToTheme, readPersistedTheme, () => 'system');
+  const setTheme = useCallback((next: Theme) => {
+    persistTheme(next);
   }, []);
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('dark');
+  // `true` once the component has hydrated on the client. `useSyncExternalStore` is used
+  // instead of a `mounted` state + effect so that no extra render is needed.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const transitionRef = React.useRef<ViewTransition | null>(null);
 
   useEffect(() => {
     if (!mounted) return;
 
     const applyTheme = (newTheme?: 'light' | 'dark') => {
-      const themeToApply = newTheme || (theme === 'system' 
+      const themeToApply: 'light' | 'dark' = newTheme || (theme === 'system' 
         ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : theme);
+        : theme === 'light' ? 'light' : 'dark');
       
       setActualTheme(themeToApply);
       document.documentElement.classList.toggle('dark', themeToApply === 'dark');
@@ -56,10 +80,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Check if View Transition API is supported
-      // @ts-ignore - View Transition API is experimental
       if (typeof document.startViewTransition === 'function') {
         try {
-          // @ts-ignore
           transitionRef.current = document.startViewTransition(() => {
             applyTheme();
           });

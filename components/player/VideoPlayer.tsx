@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useHistory } from '@/lib/store/history-store';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
@@ -60,9 +60,13 @@ export function VideoPlayer({
   const { viewingHistory, addToHistory } = useHistory(isPremium);
   const searchParams = useSearchParams();
 
-  // Get video metadata from URL params
-  const source = searchParams.get('source') || '';
-  const title = searchParams.get('title') || '未知视频';
+  // Get video metadata from URL params.
+  // The values are read inside a `useMemo` so that downstream memoization depends on
+  // plain strings rather than on the mutable `searchParams` object itself.
+  const { source, title } = useMemo(() => ({
+    source: searchParams.get('source') || '',
+    title: searchParams.get('title') || '未知视频',
+  }), [searchParams]);
 
   // Get saved progress for this video
   const getSavedProgress = () => {
@@ -117,7 +121,7 @@ export function VideoPlayer({
       lastSaveTimeRef.current = now;
       saveProgress(currentTime, duration);
     }
-  }, [videoId, playUrl, saveProgress]);
+  }, [videoId, playUrl, saveProgress, externalTimeRef]);
 
   // Save on page leave/refresh
   useEffect(() => {

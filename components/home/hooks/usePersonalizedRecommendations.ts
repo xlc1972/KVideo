@@ -25,7 +25,18 @@ import {
   type RecommendationQuery,
 } from '@/lib/utils/recommendation-engine';
 
-interface DoubanMovie {
+export interface DoubanMovie {
+  id: string;
+  title: string;
+  cover: string;
+  rate: string;
+  url: string;
+}
+
+/**
+ * The raw subject shape returned by the Douban recommend API.
+ */
+interface DoubanSubject {
   id: string;
   title: string;
   cover: string;
@@ -76,7 +87,7 @@ export function usePersonalizedRecommendations(isPremium = false) {
           );
           if (!res.ok) return { label: query.label, movies: [] as DoubanMovie[] };
           const data = await res.json();
-          const movies: DoubanMovie[] = (data.subjects || []).map((s: any) => ({
+          const movies: DoubanMovie[] = ((data.subjects || []) as DoubanSubject[]).map((s) => ({
             id: s.id,
             title: s.title,
             cover: s.cover,

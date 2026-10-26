@@ -1,5 +1,13 @@
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
+import type {
+    HlsConfig,
+    LoaderCallbacks,
+    LoaderConfiguration,
+    LoaderContext,
+    LoaderResponse,
+    LoaderStats,
+} from 'hls.js';
 import { usePlayerSettings } from './usePlayerSettings';
 import { filterM3u8Ad } from '@/lib/utils/m3u8-utils';
 import { useRuntimeFeatures } from '@/components/RuntimeFeaturesProvider';
@@ -48,23 +56,35 @@ export function useHlsPlayer({
         if (isMSESupported) {
 
             // Define custom loader class to intercept manifest loading
-            // We use 'any' cast because default loader type might not be strictly exposed in all typings
-            const DefaultLoader = (Hls as any).DefaultConfig.loader;
+            // The default loader type is not strictly exposed in all typings, so it is read
+            // through a narrow structural type.
+            const DefaultLoader = Hls.DefaultConfig.loader;
 
             class AdFilterLoader extends DefaultLoader {
-                load(context: any, config: any, callbacks: any) {
-                    if (isAdFilterEnabled && (context.type === 'manifest' || context.type === 'level')) {
+                load(
+                    context: LoaderContext,
+                    config: LoaderConfiguration,
+                    callbacks: LoaderCallbacks<LoaderContext>
+                ) {
+                    // `type` is only present on playlist contexts ('manifest' / 'level').
+                    const contextType = (context as { type?: string }).type;
+                    if (isAdFilterEnabled && (contextType === 'manifest' || contextType === 'level')) {
                         const originalOnSuccess = callbacks.onSuccess;
-                        callbacks.onSuccess = (response: any, stats: any, context: any, networkDetails: any) => {
+                        callbacks.onSuccess = (
+                            response: LoaderResponse,
+                            stats: LoaderStats,
+                            ctx: LoaderContext,
+                            networkDetails: unknown
+                        ) => {
                             if (typeof response.data === 'string') {
                                 try {
                                     // Filter the content
-                                    response.data = filterM3u8Ad(response.data, context.url, adFilterMode, adKeywords);
+                                    response.data = filterM3u8Ad(response.data, ctx.url, adFilterMode, adKeywords);
                                 } catch (e) {
                                     console.warn('[HLS] Ad filter error:', e);
                                 }
                             }
-                            originalOnSuccess(response, stats, context, networkDetails);
+                            originalOnSuccess(response, stats, ctx, networkDetails);
                         };
                     }
                     super.load(context, config, callbacks);
@@ -76,7 +96,7 @@ export function useHlsPlayer({
                 // Exceptions might exist for iOS where MSE is strictly not available, check Hls.isSupported() result carefully.
                 // Hls.isSupported() is false on iOS Safari usually, so this block won't run there.
 
-                const config: any = {
+                const config: Partial<HlsConfig> = {
                     // Worker & Performance
                     enableWorker: true,
                     lowLatencyMode: false,

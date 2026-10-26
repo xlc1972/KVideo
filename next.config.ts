@@ -6,13 +6,26 @@ const lanAllowedDevOrigins = getLanAllowedDevOrigins();
 const nextConfig: NextConfig = {
   ...(lanAllowedDevOrigins.length > 0 ? { allowedDevOrigins: lanAllowedDevOrigins } : {}),
 
+  // 家庭净化版 - 显式注入 env 给 Edge runtime (Next standalone 在 workerd V8 isolate 里读不到 process.env)
+  env: {
+    ACCESS_PASSWORD: process.env.ACCESS_PASSWORD || "",
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
+    SUBSCRIPTION_SOURCES: process.env.SUBSCRIPTION_SOURCES || '[{"name":"家庭净化片源","url":"http://127.0.0.1:13080/family-sources.json"}]',
+    AD_KEYWORDS_FILE: process.env.AD_KEYWORDS_FILE || "ad-keywords.txt",
+    MERGE_SOURCES: process.env.MERGE_SOURCES || "true",
+    IPTV_SOURCES: process.env.IPTV_SOURCES || "",
+    DANMAKU_API_URL: process.env.DANMAKU_API_URL || "",
+    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME || "紫气东来影院",
+    NEXT_PUBLIC_SITE_TITLE: process.env.NEXT_PUBLIC_SITE_TITLE || "紫气东来 - 家庭影视",
+  },
+
   // Performance optimizations
   reactStrictMode: true,
   poweredByHeader: false,
 
   // Compiler optimizations
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'production'
   },
 
   output: 'standalone',
@@ -23,98 +36,29 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      // Douban images
-      {
-        protocol: 'https',
-        hostname: 'img3.doubanio.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img1.doubanio.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img2.doubanio.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img9.doubanio.com',
-      },
-      // Video source images - allow all subdomains with wildcards
-      {
-        protocol: 'http',
-        hostname: '**.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.com',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.cn',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.cn',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.net',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.net',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.org',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.org',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.tv',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.tv',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.io',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.io',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.xyz',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.xyz',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.online',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.online',
-      },
-      {
-        protocol: 'http',
-        hostname: '**.top',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.top',
-      },
+      { protocol: 'https', hostname: 'img3.doubanio.com' },
+      { protocol: 'https', hostname: 'img1.doubanio.com' },
+      { protocol: 'https', hostname: 'img2.doubanio.com' },
+      { protocol: 'https', hostname: 'img9.doubanio.com' },
+      { protocol: 'http', hostname: '**.com' },
+      { protocol: 'https', hostname: '**.com' },
+      { protocol: 'http', hostname: '**.cn' },
+      { protocol: 'https', hostname: '**.cn' },
+      { protocol: 'http', hostname: '**.net' },
+      { protocol: 'https', hostname: '**.net' },
+      { protocol: 'http', hostname: '**.org' },
+      { protocol: 'https', hostname: '**.org' },
+      { protocol: 'http', hostname: '**.tv' },
+      { protocol: 'https', hostname: '**.tv' },
+      { protocol: 'http', hostname: '**.io' },
+      { protocol: 'https', hostname: '**.io' },
+      { protocol: 'http', hostname: '**.xyz' },
+      { protocol: 'https', hostname: '**.xyz' },
+      { protocol: 'http', hostname: '**.online' },
+      { protocol: 'https', hostname: '**.online' },
+      { protocol: 'http', hostname: '**.top' },
+      { protocol: 'https', hostname: '**.top' },
     ],
-    // Add image optimization for better performance
     formats: ['image/webp'],
     minimumCacheTTL: 60,
   },

@@ -22,11 +22,17 @@ export function useStallDetection({
     isTransitioningToNextEpisode
 }: UseStallDetectionProps) {
     const lastTimeRef = useRef<number>(0);
-    const lastUpdateTimeRef = useRef<number>(Date.now());
+    // Lazily initialised: `Date.now()` is impure and must not be called during render.
+    // The value is set in the effect below, before the interval that reads it starts.
+    const lastUpdateTimeRef = useRef<number | null>(null);
     const isStalledByMeRef = useRef<boolean>(false);
 
     useEffect(() => {
         if (!videoRef.current) return;
+
+        if (lastUpdateTimeRef.current === null) {
+            lastUpdateTimeRef.current = Date.now();
+        }
 
         const checkStall = () => {
             if (!videoRef.current) return;
@@ -46,7 +52,7 @@ export function useStallDetection({
                     lastUpdateTimeRef.current = now;
                 } else {
                     // Time hasn't moved. Check how long it's been.
-                    const stallDuration = now - lastUpdateTimeRef.current;
+                    const stallDuration = now - (lastUpdateTimeRef.current ?? now);
                     if (stallDuration > 200) {
                         setIsLoading(true);
                         isStalledByMeRef.current = true;

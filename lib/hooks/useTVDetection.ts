@@ -3,7 +3,7 @@
  * Detects if the user is on a TV/set-top-box browser.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const TV_USER_AGENT_PATTERNS = [
   /smarttv/i,
@@ -21,29 +21,31 @@ const TV_USER_AGENT_PATTERNS = [
   /hbbtv/i,
 ];
 
+/**
+ * Detect whether the current browser is a TV / set-top-box browser.
+ * Returns `false` when there is no browser (server side rendering).
+ */
+function detectTV(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+
+  const ua = navigator.userAgent;
+
+  // Check UA for TV indicators
+  const uaMatch = TV_USER_AGENT_PATTERNS.some(pattern => pattern.test(ua));
+  if (uaMatch) return true;
+
+  // Fallback heuristic: large screen + no touch + low pixel density
+  const isLargeScreen = window.innerWidth >= 1280;
+  const hasNoTouch = !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
+  const lowDensity = window.devicePixelRatio <= 1.5;
+
+  return isLargeScreen && hasNoTouch && lowDensity;
+}
+
 export function useTVDetection(): boolean {
-  const [isTV, setIsTV] = useState(false);
-
-  useEffect(() => {
-    const ua = navigator.userAgent;
-
-    // Check UA for TV indicators
-    const uaMatch = TV_USER_AGENT_PATTERNS.some(pattern => pattern.test(ua));
-
-    if (uaMatch) {
-      setIsTV(true);
-      return;
-    }
-
-    // Fallback heuristic: large screen + no touch + low pixel density
-    const isLargeScreen = window.innerWidth >= 1280;
-    const hasNoTouch = !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
-    const lowDensity = window.devicePixelRatio <= 1.5;
-
-    if (isLargeScreen && hasNoTouch && lowDensity) {
-      setIsTV(true);
-    }
-  }, []);
+  // The detection result never changes for the lifetime of the page, so it is computed
+  // once during the initial render instead of being set from an effect.
+  const [isTV] = useState(detectTV);
 
   return isTV;
 }

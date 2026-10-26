@@ -4,6 +4,7 @@ import { useSearchCache } from '@/lib/hooks/useSearchCache';
 import { useParallelSearch } from '@/lib/hooks/useParallelSearch';
 import { useSubscriptionSync } from '@/lib/hooks/useSubscriptionSync';
 import { settingsStore } from '@/lib/store/settings-store';
+import type { SortOption } from '@/lib/store/settings-store';
 import { VideoSource } from '@/lib/types';
 
 export function usePremiumHomePage() {
@@ -16,7 +17,7 @@ export function usePremiumHomePage() {
 
     const [query, setQuery] = useState('');
     const [hasSearched, setHasSearched] = useState(false);
-    const [currentSortBy, setCurrentSortBy] = useState('default');
+    const [currentSortBy, setCurrentSortBy] = useState<SortOption>('default');
 
     // Use state for sources to trigger re-renders when they update
     const [enabledPremiumSources, setEnabledPremiumSources] = useState<VideoSource[]>([]);
@@ -53,7 +54,7 @@ export function usePremiumHomePage() {
             return false;
         }
 
-        performSearch(searchQuery, sources, currentSortBy as any);
+        performSearch(searchQuery, sources, currentSortBy);
         hasSearchedWithSourcesRef.current = true;
         return true;
     }, [performSearch, currentSortBy]);
@@ -61,7 +62,7 @@ export function usePremiumHomePage() {
     // Re-sort results when sort preference changes
     useEffect(() => {
         if (hasSearched && results.length > 0) {
-            applySorting(currentSortBy as any);
+            applySorting(currentSortBy);
         }
     }, [currentSortBy, applySorting, hasSearched, results.length]);
 
@@ -98,6 +99,15 @@ export function usePremiumHomePage() {
         return () => unsubscribe();
     }, [query, loading, executeSearch]);
 
+    // 用函数声明而非 const 箭头函数: 上面的 useEffect 回调里会调用 handleSearch,
+    // const 箭头函数在此处是 TDZ (暂时性死区) 风险。函数声明会提升, 顺序安全。
+    function handleSearch(searchQuery: string) {
+        setQuery(searchQuery);
+        setHasSearched(true);
+        // Use current state of sources
+        executeSearch(searchQuery, enabledPremiumSources);
+    }
+
     // Load cached results on mount
     useEffect(() => {
         if (hasLoadedCache.current) return;
@@ -118,13 +128,6 @@ export function usePremiumHomePage() {
             // If no sources yet, the useEffect above will catch it when they load
         }
     }, [searchParams]);
-
-    const handleSearch = (searchQuery: string) => {
-        setQuery(searchQuery);
-        setHasSearched(true);
-        // Use current state of sources
-        executeSearch(searchQuery, enabledPremiumSources);
-    };
 
     const handleReset = () => {
         setHasSearched(false);

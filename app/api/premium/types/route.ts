@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { PREMIUM_SOURCES } from '@/lib/api/premium-sources';
+import type { VideoSource } from '@/lib/types';
+
+/** Shape of the upstream CMS class endpoint response. */
+type TypesListResponse = {
+    class?: Category[];
+};
 
 export const runtime = 'edge';
 
@@ -17,12 +23,12 @@ interface SourceCategories {
 }
 
 // Shared handler
-async function handleTypesRequest(sourceList: any[]) {
+async function handleTypesRequest(sourceList: VideoSource[]) {
     try {
         const enabledSources = sourceList.filter(s => s.enabled);
 
         const results = await Promise.allSettled(
-            enabledSources.map(async (source: any) => {
+            enabledSources.map(async (source: VideoSource) => {
                 try {
                     const url = new URL(source.baseUrl);
                     url.searchParams.set('ac', 'list');
@@ -44,7 +50,7 @@ async function handleTypesRequest(sourceList: any[]) {
                         throw new Error(`HTTP ${response.status}`);
                     }
 
-                    const data = await response.json();
+                    const data = (await response.json()) as TypesListResponse;
                     return {
                         sourceId: source.id,
                         sourceName: source.name,

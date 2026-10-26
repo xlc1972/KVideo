@@ -74,11 +74,11 @@ export interface AccountInfo {
 
 const SESSION_COOKIE_NAME = 'kvideo_session';
 const MANAGED_ACCOUNTS_KEY = 'auth:accounts:v1';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || '';
-const ACCOUNTS = process.env.ACCOUNTS || '';
-const AUTH_SECRET = process.env.AUTH_SECRET || '';
-const PREMIUM_PASSWORD = process.env.PREMIUM_PASSWORD || '';
+const ADMIN_PASSWORD_FB = '';
+const ACCESS_PASSWORD_FB = '';
+const ACCOUNTS_FB = '';
+const AUTH_SECRET_FB = '';
+const PREMIUM_PASSWORD_FB = '';
 const PERSIST_SESSION = process.env.PERSIST_SESSION !== 'false';
 const SUBSCRIPTION_SOURCES = process.env.SUBSCRIPTION_SOURCES || process.env.NEXT_PUBLIC_SUBSCRIPTION_SOURCES || '';
 const IPTV_SOURCES = process.env.IPTV_SOURCES || process.env.NEXT_PUBLIC_IPTV_SOURCES || '';
@@ -87,9 +87,11 @@ const DANMAKU_API_URL = process.env.DANMAKU_API_URL || process.env.NEXT_PUBLIC_D
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 const MANAGED_AUTH_FORCED = process.env.MANAGED_AUTH_ENABLED === 'true';
 
-function getEffectiveAdminPassword(): string {
-  return getRuntimeEnvValue('ADMIN_PASSWORD', ADMIN_PASSWORD) ||
-    getRuntimeEnvValue('ACCESS_PASSWORD', ACCESS_PASSWORD);
+function getEffectiveAdminPassword(): string[] {
+  return [
+    getRuntimeEnvValue('ADMIN_PASSWORD', ADMIN_PASSWORD_FB),
+    getRuntimeEnvValue('ACCESS_PASSWORD', ACCESS_PASSWORD_FB),
+  ].filter((value) => value && value.length > 0);
 }
 
 export class ManagedAuthStorageError extends Error {
@@ -100,11 +102,11 @@ export class ManagedAuthStorageError extends Error {
 }
 
 function isManagedAuthEnabled(): boolean {
-  return !!getRuntimeEnvValue('AUTH_SECRET', AUTH_SECRET) && !!getRedisClient();
+  return !!getRuntimeEnvValue("AUTH_SECRET", AUTH_SECRET_FB) && !!getRedisClient();
 }
 
 function isLegacyAuthConfigured(): boolean {
-  return !!(getEffectiveAdminPassword() || ACCOUNTS);
+  return !!(getEffectiveAdminPassword().length || getRuntimeEnvValue('ACCOUNTS', ACCOUNTS_FB));
 }
 
 function isStoredAccountRecord(value: unknown): value is StoredAccountRecord {
@@ -162,20 +164,20 @@ async function saveManagedAccounts(accounts: StoredAccountRecord[]): Promise<voi
 function getBootstrapSeeds(): SeedAccountInput[] {
   const seeds: SeedAccountInput[] = [];
   const usernames = new Set<string>();
-  const effectiveAdminPassword = getEffectiveAdminPassword();
+  const effectiveAdminPasswords = getEffectiveAdminPassword();
 
-  if (effectiveAdminPassword) {
+  if (effectiveAdminPasswords.length > 0) {
     usernames.add('admin');
     seeds.push({
       username: 'admin',
-      password: effectiveAdminPassword,
+      password: effectiveAdminPasswords[0],
       name: '超级管理员',
       role: 'super_admin',
       customPermissions: [],
     });
   }
 
-  for (const account of parseBootstrapAccounts(ACCOUNTS)) {
+  for (const account of parseBootstrapAccounts(getRuntimeEnvValue('ACCOUNTS', ACCOUNTS_FB))) {
     const username = ensureUniqueUsername(account.username, usernames, account.name);
     usernames.add(username);
     seeds.push({ ...account, username });
@@ -238,7 +240,7 @@ export async function getPublicAuthConfig(): Promise<PublicAuthConfig> {
 
   return {
     hasAuth: loginMode !== 'none',
-    hasPremiumAuth: !!PREMIUM_PASSWORD,
+    hasPremiumAuth: !!getRuntimeEnvValue('PREMIUM_PASSWORD', PREMIUM_PASSWORD_FB),
     loginMode,
     ...getPublicRuntimeConfig(),
   };
@@ -258,13 +260,14 @@ async function generateLegacyProfileId(password: string): Promise<string> {
 }
 
 function resolveSessionSecret(loginMode: LoginMode): string | null {
-  const authSecret = getRuntimeEnvValue('AUTH_SECRET', AUTH_SECRET);
+  const authSecret = getRuntimeEnvValue('AUTH_SECRET', AUTH_SECRET_FB);
   if (authSecret) {
     return authSecret;
   }
 
   if (loginMode === 'legacy_password' && isLegacyAuthConfigured()) {
-    return `legacy:${getEffectiveAdminPassword()}:${ACCOUNTS}:${PREMIUM_PASSWORD}`;
+    const passwords = getEffectiveAdminPassword();
+    return `legacy:${passwords.join('|')}:${getRuntimeEnvValue('ACCOUNTS', ACCOUNTS_FB)}:${getRuntimeEnvValue('PREMIUM_PASSWORD', PREMIUM_PASSWORD_FB)}`;
   }
 
   return null;
@@ -343,7 +346,7 @@ async function authenticateManagedLogin(username: string, password: string): Pro
   const usesBootstrapAdminCredential = isBootstrapAdminCredential(
     normalizedUsername,
     password,
-    getEffectiveAdminPassword()
+    getEffectiveAdminPassword()[0] || ""
   );
 
   const accounts = await ensureManagedAccountsBootstrapped();
@@ -392,9 +395,9 @@ async function authenticateManagedLogin(username: string, password: string): Pro
 
 async function authenticateLegacyLogin(password: string): Promise<ServerAuthSession | null> {
   if (!password) return null;
-  const effectiveAdminPassword = getEffectiveAdminPassword();
+  const effectiveAdminPasswords = getEffectiveAdminPassword();
 
-  if (effectiveAdminPassword && password === effectiveAdminPassword) {
+  if (effectiveAdminPasswords.includes(password)) {
     return {
       accountId: 'legacy-admin',
       profileId: await generateLegacyProfileId(password),
@@ -407,7 +410,7 @@ async function authenticateLegacyLogin(password: string): Promise<ServerAuthSess
     };
   }
 
-  for (const account of parseBootstrapAccounts(ACCOUNTS)) {
+  for (const account of parseBootstrapAccounts(getRuntimeEnvValue('ACCOUNTS', ACCOUNTS_FB))) {
     if (account.password !== password) continue;
     return {
       accountId: `legacy:${account.username}`,
@@ -456,7 +459,7 @@ export async function validatePremiumAccess(
     return true;
   }
 
-  if (!PREMIUM_PASSWORD) {
+  if (!getRuntimeEnvValue('PREMIUM_PASSWORD', PREMIUM_PASSWORD_FB)) {
     return true;
   }
 
@@ -464,7 +467,7 @@ export async function validatePremiumAccess(
     return false;
   }
 
-  if (body.password === PREMIUM_PASSWORD) {
+  if (body.password === getRuntimeEnvValue('PREMIUM_PASSWORD', PREMIUM_PASSWORD_FB)) {
     return true;
   }
 
@@ -545,7 +548,7 @@ export async function listAccountInfo(): Promise<AccountInfo[]> {
   const legacyAccounts: AccountInfo[] = [];
   let index = 0;
 
-  if (getEffectiveAdminPassword()) {
+  if (getEffectiveAdminPassword().length > 0) {
     legacyAccounts.push({
       id: 'legacy-admin',
       username: 'admin',
@@ -558,7 +561,7 @@ export async function listAccountInfo(): Promise<AccountInfo[]> {
     index += 1;
   }
 
-  for (const account of parseBootstrapAccounts(ACCOUNTS)) {
+  for (const account of parseBootstrapAccounts(getRuntimeEnvValue('ACCOUNTS', ACCOUNTS_FB))) {
     legacyAccounts.push({
       id: `legacy-${index}`,
       username: account.username,

@@ -5,6 +5,21 @@
 import type { SortOption } from '@/lib/store/settings-store';
 import type { Video } from '@/lib/types';
 
+/**
+ * Some upstream sources expose extra fields that are not part of the shared `Video`
+ * interface (e.g. `vod_score`). They are read defensively, so a partial shape is used.
+ */
+type SortableVideo = Video & {
+  vod_score?: number | string;
+};
+
+const relevanceScoreOf = (video: Video): number => video.relevanceScore || 0;
+const ratingOf = (video: Video): number => {
+  const score = (video as SortableVideo).vod_score;
+  const parsed = typeof score === 'string' ? parseFloat(score) : score;
+  return typeof parsed === 'number' && !Number.isNaN(parsed) ? parsed : 0;
+};
+
 export function sortVideos(videos: Video[], sortBy: SortOption): Video[] {
   const sorted = [...videos];
 
@@ -12,8 +27,8 @@ export function sortVideos(videos: Video[], sortBy: SortOption): Video[] {
     case 'relevance':
       // Sort by relevance score (highest first)
       return sorted.sort((a, b) => {
-        const scoreA = (a as any).relevanceScore || 0;
-        const scoreB = (b as any).relevanceScore || 0;
+        const scoreA = relevanceScoreOf(a);
+        const scoreB = relevanceScoreOf(b);
         return scoreB - scoreA;
       });
 
@@ -44,8 +59,8 @@ export function sortVideos(videos: Video[], sortBy: SortOption): Video[] {
     case 'rating-desc':
       // Sort by rating if available (placeholder for future implementation)
       return sorted.sort((a, b) => {
-        const ratingA = (a as any).vod_score || 0;
-        const ratingB = (b as any).vod_score || 0;
+        const ratingA = ratingOf(a);
+        const ratingB = ratingOf(b);
         return ratingB - ratingA;
       });
 
@@ -65,8 +80,8 @@ export function sortVideos(videos: Video[], sortBy: SortOption): Video[] {
     default:
       // Default: by relevance then latency
       return sorted.sort((a, b) => {
-        const scoreA = (a as any).relevanceScore || 0;
-        const scoreB = (b as any).relevanceScore || 0;
+        const scoreA = relevanceScoreOf(a);
+        const scoreB = relevanceScoreOf(b);
 
         if (scoreA !== scoreB) {
           return scoreB - scoreA;

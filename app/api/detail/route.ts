@@ -36,7 +36,7 @@ async function handleDetailRequest(id: string | null, source: string | null, met
     sourceConfig = source;
   } else {
     // If source is a string ID (from GET), try to look it up
-    sourceConfig = getSourceById(source);
+    sourceConfig = await getSourceById(source);
   }
 
   if (!sourceConfig) {

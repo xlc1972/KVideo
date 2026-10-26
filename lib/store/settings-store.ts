@@ -76,6 +76,19 @@ import { exportSettings, importSettings, SEARCH_HISTORY_KEY, WATCH_HISTORY_KEY }
 
 const SETTINGS_KEY = 'kvideo-settings';
 
+/**
+ * 设置结构版本号。
+ *
+ * v2: proxyMode 默认从 'retry' 改为 'always'。
+ *      直连上游 m3u8 在本部署必然失败 (HTTP 403 且无 CORS 头),
+ *      Hls.js 会重试 4 次 (~44 秒) 才 fallback 到代理,
+ *      表现为"播放端点不动/遥控无反应"。
+ *      存量 localStorage (已装机的电视) 里的旧默认值需要一并升级,
+ *      因此这里用版本号做一次性强制迁移。
+ */
+const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION_KEY = 'kvideo-settings-version';
+
 export const getDefaultSources = (): VideoSource[] => DEFAULT_SOURCES;
 export const getDefaultPremiumSources = (): VideoSource[] => PREMIUM_SOURCES;
 
@@ -87,11 +100,12 @@ function getEnvSubscriptions(customValue?: string): SourceSubscription[] {
 
   // 1. Try JSON
   try {
-    const raw = JSON.parse(envValue);
+    const raw: unknown = JSON.parse(envValue);
     if (Array.isArray(raw)) {
       return raw
-        .filter((item: any) => item && typeof item.name === 'string' && typeof item.url === 'string')
-        .map((item: any) => createSubscription(item.name, item.url));
+        .filter((item): item is { name: string; url: string } =>
+          !!item && typeof (item as { name?: unknown }).name === 'string' && typeof (item as { url?: unknown }).url === 'string')
+        .map((item) => createSubscription(item.name, item.url));
     }
   } catch (e) {
     // Ignore JSON parse error, try direct URL
@@ -141,7 +155,7 @@ function getDefaultAppSettings(): AppSettings {
     searchDisplayMode: 'normal',
     episodeReverseOrder: false,
     fullscreenType: 'auto',
-    proxyMode: 'retry',
+    proxyMode: 'always',
     rememberScrollPosition: true,
     personalizedRecommendations: true,
     videoTogetherEnabled: false,
@@ -188,6 +202,25 @@ export const settingsStore = {
 
     try {
       const parsed = JSON.parse(stored);
+
+      // 设置结构版本迁移 (一次性)。
+      // v2: proxyMode 默认由 'retry' 改为 'always'。
+      //     直连上游 m3u8 在本部署必然 403 且无 CORS 头,
+      //     Hls.js 要重试 4 次 (~44 秒) 才 fallback 到代理,
+      //     表现为"播放端点不动 / 遥控无反应"。
+      //     存量 localStorage (已装机的电视) 没有版本号, 这里一次性升级。
+      const storedVersion = Number(localStorage.getItem(SETTINGS_VERSION_KEY) || '0');
+      if (storedVersion < SETTINGS_VERSION) {
+        if (parsed.proxyMode === 'retry' || parsed.proxyMode === undefined) {
+          parsed.proxyMode = 'always';
+        }
+        try {
+          localStorage.setItem(SETTINGS_VERSION_KEY, String(SETTINGS_VERSION));
+        } catch {
+          // localStorage 不可用时忽略
+        }
+      }
+
       // Get ENV subscriptions
       const envSubscriptions = getEnvSubscriptions();
 
@@ -218,16 +251,16 @@ export const settingsStore = {
 
       // Filter out invalid sources (missing baseUrl etc)
       const validSources = (Array.isArray(parsed.sources) ? parsed.sources : getDefaultSources())
-        .filter((s: any) => s && s.id && s.name && s.baseUrl);
+        .filter((s: VideoSource) => s && s.id && s.name && s.baseUrl);
 
       const validPremiumSources = (Array.isArray(parsed.premiumSources) ? parsed.premiumSources : getDefaultPremiumSources())
-        .filter((s: any) => s && s.id && s.name && s.baseUrl);
+        .filter((s: VideoSource) => s && s.id && s.name && s.baseUrl);
 
       // Validate that parsed data has all required properties
       return {
         sources: validSources,
         premiumSources: validPremiumSources,
-        subscriptions: mergedSubscriptions.filter((s: any) => s && s.id && s.name && s.url),
+        subscriptions: mergedSubscriptions.filter((s: SourceSubscription) => s && s.id && s.name && s.url),
         sortBy: parsed.sortBy || 'default',
         searchHistory: parsed.searchHistory !== undefined ? parsed.searchHistory : true,
         watchHistory: parsed.watchHistory !== undefined ? parsed.watchHistory : true,
@@ -245,7 +278,7 @@ export const settingsStore = {
         searchDisplayMode: parsed.searchDisplayMode === 'grouped' ? 'grouped' : 'normal',
         episodeReverseOrder: parsed.episodeReverseOrder !== undefined ? parsed.episodeReverseOrder : false,
         fullscreenType: (parsed.fullscreenType === 'window' || parsed.fullscreenType === 'native' || parsed.fullscreenType === 'auto') ? parsed.fullscreenType : 'auto',
-        proxyMode: (parsed.proxyMode === 'retry' || parsed.proxyMode === 'none' || parsed.proxyMode === 'always') ? parsed.proxyMode : 'retry',
+        proxyMode: (parsed.proxyMode === 'retry' || parsed.proxyMode === 'none' || parsed.proxyMode === 'always') ? parsed.proxyMode : 'always',
         rememberScrollPosition: parsed.rememberScrollPosition !== undefined ? parsed.rememberScrollPosition : true,
         personalizedRecommendations: parsed.personalizedRecommendations !== undefined ? parsed.personalizedRecommendations : true,
         videoTogetherEnabled: parsed.videoTogetherEnabled !== undefined ? parsed.videoTogetherEnabled : false,

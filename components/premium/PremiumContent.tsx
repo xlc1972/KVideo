@@ -6,6 +6,8 @@ import { MovieGrid } from '@/components/home/MovieGrid';
 import { PremiumContentGrid } from './PremiumContentGrid';
 import { usePremiumTagManager } from '@/lib/hooks/usePremiumTagManager';
 import { usePremiumContent } from '@/lib/hooks/usePremiumContent';
+import type { PremiumVideo } from '@/lib/hooks/usePremiumContent';
+import type { DoubanMovie } from '@/components/home/hooks/usePersonalizedRecommendations';
 import { usePersonalizedRecommendations } from '@/components/home/hooks/usePersonalizedRecommendations';
 
 interface PremiumContentProps {
@@ -60,9 +62,10 @@ export function PremiumContent({ onSearch }: PremiumContentProps) {
         loadMoreRef,
     } = usePremiumContent(effectiveRecommendSelected ? '' : categoryValue);
 
-    const handleVideoClick = (video: any) => {
+    const handleVideoClick = (video: PremiumVideo | DoubanMovie) => {
         if (onSearch) {
-            onSearch(video.vod_name || video.title);
+            const query = 'vod_name' in video ? video.vod_name : video.title;
+            onSearch(query);
         }
     };
 

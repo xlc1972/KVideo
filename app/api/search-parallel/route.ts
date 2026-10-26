@@ -9,6 +9,7 @@ import { NextRequest } from 'next/server';
 import { searchVideos } from '@/lib/api/client';
 import { getSourceName } from '@/lib/utils/source-names';
 import { traditionalToSimplified } from '@/lib/utils/chinese-convert';
+import type { VideoItem, VideoSource } from '@/lib/types';
 
 export const runtime = 'edge';
 
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         let completedSources = 0;
         let totalVideosFound = 0;
 
-        const searchPromises = sources.map(async (source: any) => {
+        const searchPromises = sources.map(async (source: VideoSource) => {
           if (signal.aborted) return;
 
           const startTime = performance.now();
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
             if (videos.length > 0 && !signal.aborted) {
               safeSend({
                 type: 'videos',
-                videos: videos.map((video: any) => ({
+                videos: videos.map((video: VideoItem) => ({
                   ...video,
                   sourceDisplayName: getSourceName(source.id),
                   latency,
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
                   if (pageVideos.length > 0 && !signal.aborted) {
                     safeSend({
                       type: 'videos',
-                      videos: pageVideos.map((video: any) => ({
+                      videos: pageVideos.map((video: VideoItem) => ({
                         ...video,
                         sourceDisplayName: getSourceName(source.id),
                         latency,

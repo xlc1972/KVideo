@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -12,12 +12,17 @@ export function ExportModal({ isOpen, onClose, onExport }: ExportModalProps) {
   const [includeSearchHistory, setIncludeSearchHistory] = useState(true);
   const [includeWatchHistory, setIncludeWatchHistory] = useState(true);
 
-  useEffect(() => {
+  // Reset the checkboxes every time the modal is opened. The state is adjusted during
+  // render (React's documented "reset state on prop change" pattern) so that no extra
+  // render is needed.
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       setIncludeSearchHistory(true);
       setIncludeWatchHistory(true);
     }
-  }, [isOpen]);
+  }
 
   const handleExport = () => {
     onExport(includeSearchHistory, includeWatchHistory);

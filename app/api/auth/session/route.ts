@@ -5,7 +5,6 @@ import {
   ManagedAuthStorageError,
 } from '@/lib/server/auth';
 
-export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   try {

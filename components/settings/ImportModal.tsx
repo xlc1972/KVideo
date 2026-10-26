@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ImportModalTabs } from './import/ImportModalTabs';
 import { FileImportTab } from './import/FileImportTab';
 import { LinkImportTab } from './import/LinkImportTab';
@@ -36,12 +36,15 @@ export function ImportModal({
 }: ImportModalProps) {
   const [activeTab, setActiveTab] = useState<'file' | 'link' | 'subscription' | 'json'>('file');
 
-  // Reset tab on open
-  useEffect(() => {
+  // Reset tab on open. The state is adjusted during render (React's documented
+  // "reset state on prop change" pattern) so that no extra render is needed.
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       setActiveTab('file');
     }
-  }, [isOpen]);
+  }
 
   if (!isOpen) return null;
 

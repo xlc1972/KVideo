@@ -108,6 +108,9 @@ export function AppVersionSettings() {
   const [data, setData] = useState<AppUpdateResponse | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Manual refresh requests are signalled through state because `fetchUpdateInfo` is an
+  // Effect Event and may only be called from Effects.
+  const [manualRefreshToken, setManualRefreshToken] = useState(0);
 
   const fetchUpdateInfo = useEffectEvent(async (manual: boolean = false) => {
     if (manual) {
@@ -155,8 +158,13 @@ export function AppVersionSettings() {
     void fetchUpdateInfo(false);
   }, []);
 
-  const handleRefresh = () => {
+  useEffect(() => {
+    if (manualRefreshToken === 0) return;
     void fetchUpdateInfo(true);
+  }, [manualRefreshToken]);
+
+  const handleRefresh = () => {
+    setManualRefreshToken((token) => token + 1);
   };
 
   const statusMeta = getStatusMeta(data);

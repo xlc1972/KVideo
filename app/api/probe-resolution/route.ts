@@ -102,7 +102,7 @@ async function probeOne(video: ProbeRequest, providedConfigs: Map<string, VideoS
   resolutionOrigin: 'manifest' | 'hint';
 }> {
   try {
-    const sourceConfig = providedConfigs.get(video.source) || getSourceById(video.source);
+    const sourceConfig = providedConfigs.get(video.source) || (await getSourceById(video.source));
     if (!sourceConfig) {
       return { id: video.id, source: video.source, episodeIndex: video.episodeIndex, resolution: null, resolutionOrigin: 'manifest' };
     }

@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { VideoSource } from '@/lib/types';
 
 interface UseAddSourceFormProps {
@@ -27,7 +27,15 @@ export function useAddSourceForm({ isOpen, existingIds, onAdd, onClose, initialV
     const [url, setUrl] = useState('');
     const [error, setError] = useState('');
 
-    useEffect(() => {
+    // Reset the form whenever the modal is opened or the edited source changes. The state
+    // is adjusted during render (React's documented "reset state on prop change" pattern)
+    // so that no extra render is needed.
+    const [lastInit, setLastInit] = useState<{ isOpen: boolean; initialValues: VideoSource | null | undefined }>({
+        isOpen,
+        initialValues,
+    });
+    if (isOpen !== lastInit.isOpen || initialValues !== lastInit.initialValues) {
+        setLastInit({ isOpen, initialValues });
         if (isOpen) {
             if (initialValues) {
                 setName(initialValues.name);
@@ -42,7 +50,7 @@ export function useAddSourceForm({ isOpen, existingIds, onAdd, onClose, initialV
             }
             setError('');
         }
-    }, [isOpen, initialValues]);
+    }
 
     const handleNameChange = (newName: string) => {
         setName(newName);

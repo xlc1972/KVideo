@@ -3,12 +3,34 @@ import { NextResponse } from 'next/server';
 export const runtime = 'edge';
 // We still import this type but won't rely on the empty array
 import { PREMIUM_SOURCES } from '@/lib/api/premium-sources';
+import type { VideoSource } from '@/lib/types';
+
+/** The subset of a video list item that the category route forwards to the client. */
+type CategoryVideoItem = {
+    vod_id: number | string;
+    vod_name: string;
+    vod_pic?: string;
+    vod_remarks?: string;
+    type_name?: string;
+    source: string;
+};
+
+/** Shape of the upstream CMS list endpoint response. */
+type CategoryListResponse = {
+    list?: Array<{
+        vod_id?: number | string;
+        vod_name?: string;
+        vod_pic?: string;
+        vod_remarks?: string;
+        type_name?: string;
+    }>;
+};
 
 /**
  * Shared handler for fetching content
  */
 async function handleCategoryRequest(
-    sourceList: any[],
+    sourceList: VideoSource[],
     categoryParam: string,
     page: number,
     limit: number
@@ -43,7 +65,7 @@ async function handleCategoryRequest(
             return NextResponse.json({ videos: [], error: 'No enabled sources provided or found' }, { status: 500 });
         }
 
-        const fetchPromises = targetSources.map(async (source: any) => {
+        const fetchPromises = targetSources.map(async (source: VideoSource) => {
             try {
                 const url = new URL(source.baseUrl);
                 url.searchParams.set('ac', 'detail');
@@ -68,10 +90,10 @@ async function handleCategoryRequest(
 
                 if (!response.ok) return [];
 
-                const data = await response.json();
-                return (data.list || []).map((item: any) => ({
-                    vod_id: item.vod_id,
-                    vod_name: item.vod_name,
+                const data = (await response.json()) as CategoryListResponse;
+                return (data.list || []).map((item): CategoryVideoItem => ({
+                    vod_id: item.vod_id ?? '',
+                    vod_name: item.vod_name ?? '',
                     vod_pic: item.vod_pic,
                     vod_remarks: item.vod_remarks,
                     type_name: item.type_name,
@@ -85,7 +107,7 @@ async function handleCategoryRequest(
 
         const results = await Promise.all(fetchPromises);
 
-        const interleavedVideos = [];
+        const interleavedVideos: CategoryVideoItem[] = [];
         const maxLen = Math.max(...results.map(r => r.length));
 
         for (let i = 0; i < maxLen; i++) {

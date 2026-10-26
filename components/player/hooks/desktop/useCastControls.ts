@@ -9,10 +9,71 @@ interface UseCastControlsProps {
     setIsCasting: (casting: boolean) => void;
 }
 
+/**
+ * Minimal structural types for the Google Cast Web Receiver / Cast SDK APIs.
+ * Only the members that are actually used by this hook are described.
+ */
+type CastMediaInfo = {
+    contentType?: string;
+    metadata?: unknown;
+    streamType?: string;
+};
+
+type CastMediaLoadRequest = {
+    mediaInfo: CastMediaInfo;
+    currentTime?: number;
+    autoplay?: boolean;
+};
+
+type CastMediaConstructor = new (url: string, contentType: string) => CastMediaInfo;
+type CastLoadRequestConstructor = new (mediaInfo: CastMediaInfo) => CastMediaLoadRequest;
+
+type CastMedia = {
+    MediaInfo?: CastMediaConstructor;
+    LoadRequest?: CastLoadRequestConstructor;
+    DEFAULT_MEDIA_RECEIVER_APP_ID?: string;
+};
+
+type CastSession = {
+    loadMedia: (request: CastMediaLoadRequest) => Promise<unknown>;
+};
+
+type CastContext = {
+    getCurrentSession: () => CastSession | null;
+    setOptions: (options: Record<string, unknown>) => void;
+    requestSession: () => void;
+    addEventListener: (type: string, listener: (event: CastSessionStateEvent) => void) => void;
+    removeEventListener: (type: string, listener: (event: CastSessionStateEvent) => void) => void;
+};
+
+type CastSessionStateEvent = {
+    sessionState: string;
+};
+
+/** `window.chrome.cast` — the Chrome-specific Cast API surface. */
+type ChromeCastNamespace = {
+    media?: CastMedia;
+    AutoJoinPolicy?: { ORIGIN_SCOPED: string };
+};
+
+/** `window.cast.framework` — the CAF v3 framework surface. */
+type CastFramework = {
+    CastContext?: {
+        getInstance: () => CastContext;
+    };
+    CastContextEventType?: {
+        SESSION_STATE_CHANGED: string;
+    };
+    SessionState?: {
+        SESSION_STARTED: string;
+        SESSION_RESUMED: string;
+    };
+};
+
 declare global {
     interface Window {
-        chrome: any;
-        cast: any;
+        chrome: { cast?: ChromeCastNamespace };
+        cast: { framework?: CastFramework };
         __onGCastApiAvailable?: (isAvailable: boolean) => void;
     }
 }
@@ -23,7 +84,7 @@ export function useCastControls({
     setIsCastAvailable,
     setIsCasting
 }: UseCastControlsProps) {
-    const castContextRef = useRef<any>(null);
+    const castContextRef = useRef<CastContext | null>(null);
     const loadMediaRef = useRef<() => void>(() => {});
 
     const isCastSdkReady = useCallback(() => {
@@ -63,7 +124,7 @@ export function useCastControls({
 
         session.loadMedia(request).then(
             () => console.log('Cast: Media loaded successfully'),
-            (error: any) => console.error('Cast: Media load failed', error)
+            (error: unknown) => console.error('Cast: Media load failed', error)
         );
     }, [src, videoRef]);
 
@@ -72,7 +133,7 @@ export function useCastControls({
     }, [loadMedia]);
 
     useEffect(() => {
-        let sessionStateListener: ((event: any) => void) | null = null;
+        let sessionStateListener: ((event: CastSessionStateEvent) => void) | null = null;
         let onGCastApiAvailable: ((isAvailable: boolean) => void) | null = null;
 
         const markCastUnavailable = () => {
@@ -89,12 +150,12 @@ export function useCastControls({
             }
 
             try {
-                const castContext = window.cast.framework.CastContext.getInstance();
+                const castContext = window.cast!.framework!.CastContext!.getInstance();
                 castContextRef.current = castContext;
 
                 castContext.setOptions({
-                    receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-                    autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                    receiverApplicationId: window.chrome!.cast!.media!.DEFAULT_MEDIA_RECEIVER_APP_ID!,
+                    autoJoinPolicy: window.chrome!.cast!.AutoJoinPolicy!.ORIGIN_SCOPED
                 });
 
                 // SDK loaded — show cast button immediately.
@@ -102,10 +163,10 @@ export function useCastControls({
                 setIsCastAvailable(true);
 
                 // Monitor session state
-                sessionStateListener = (event: any) => {
+                sessionStateListener = (event: CastSessionStateEvent) => {
                     const sessionState = event.sessionState;
-                    const isSessionActive = sessionState === window.cast.framework.SessionState.SESSION_STARTED ||
-                        sessionState === window.cast.framework.SessionState.SESSION_RESUMED;
+                    const isSessionActive = sessionState === window.cast!.framework!.SessionState!.SESSION_STARTED ||
+                        sessionState === window.cast!.framework!.SessionState!.SESSION_RESUMED;
 
                     setIsCasting(isSessionActive);
 
@@ -116,7 +177,7 @@ export function useCastControls({
                 };
 
                 castContext.addEventListener(
-                    window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                    window.cast!.framework!.CastContextEventType!.SESSION_STATE_CHANGED,
                     sessionStateListener
                 );
             } catch (error) {
@@ -152,7 +213,7 @@ export function useCastControls({
                 window.cast?.framework?.CastContextEventType?.SESSION_STATE_CHANGED
             ) {
                 castContext.removeEventListener(
-                    window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                    window.cast!.framework!.CastContextEventType!.SESSION_STATE_CHANGED,
                     sessionStateListener
                 );
             }
@@ -163,7 +224,7 @@ export function useCastControls({
         if (!isCastSdkReady()) return;
 
         try {
-            window.cast.framework.CastContext.getInstance().requestSession();
+            window.cast!.framework!.CastContext!.getInstance().requestSession();
         } catch (error) {
             console.warn('Cast session request failed.', error);
             setIsCastAvailable(false);

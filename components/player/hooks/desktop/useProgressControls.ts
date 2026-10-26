@@ -1,5 +1,23 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 
+/**
+ * Pointer-like event that carries coordinates either directly (mouse) or through a
+ * `touches` list (touch).
+ */
+type ProgressTouch = { clientX?: number; clientY?: number };
+
+type ProgressTouchList = {
+    length: number;
+    [index: number]: ProgressTouch | undefined;
+};
+
+type ProgressPointerEvent = {
+    clientX?: number;
+    clientY?: number;
+    touches?: ProgressTouchList;
+    preventDefault: () => void;
+};
+
 interface UseProgressControlsProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
     progressBarRef: React.RefObject<HTMLDivElement | null>;
@@ -19,7 +37,7 @@ export function useProgressControls({
 }: UseProgressControlsProps) {
     const lastDragTimeRef = useRef<number>(0);
 
-    const getEventPos = useCallback((e: any, rect: DOMRect) => {
+    const getEventPos = useCallback((e: ProgressPointerEvent, rect: DOMRect) => {
         // Handle both mouse and touch events
         const clientX = e.clientX || (e.touches && e.touches[0]?.clientX) || 0;
         const clientY = e.clientY || (e.touches && e.touches[0]?.clientY) || 0;
@@ -33,7 +51,7 @@ export function useProgressControls({
         }
     }, [isRotated]);
 
-    const handleProgressClick = useCallback((e: any) => {
+    const handleProgressClick = useCallback((e: ProgressPointerEvent) => {
         if (!videoRef.current || !progressBarRef.current) return;
         const rect = progressBarRef.current.getBoundingClientRect();
         const pos = getEventPos(e, rect);
@@ -43,13 +61,13 @@ export function useProgressControls({
         setCurrentTime(newTime);
     }, [videoRef, progressBarRef, duration, setCurrentTime, getEventPos]);
 
-    const handleProgressMouseDown = useCallback((e: any) => {
+    const handleProgressMouseDown = useCallback((e: ProgressPointerEvent) => {
         e.preventDefault();
         isDraggingProgressRef.current = true;
         handleProgressClick(e);
     }, [isDraggingProgressRef, handleProgressClick]);
 
-    const handleProgressTouchStart = useCallback((e: any) => {
+    const handleProgressTouchStart = useCallback((e: ProgressPointerEvent) => {
         e.preventDefault();
         isDraggingProgressRef.current = true;
         handleProgressClick(e);

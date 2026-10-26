@@ -7,7 +7,6 @@ import {
   updateManagedAccount,
 } from '@/lib/server/auth';
 
-export const runtime = 'edge';
 
 async function requireManagedSuperAdmin(request: NextRequest) {
   const session = await getServerSession(request);

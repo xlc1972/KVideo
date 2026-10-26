@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Icons } from '@/components/ui/Icon';
 import { getSourceName } from '@/lib/utils/source-names';
 import { htmlToText } from '@/lib/utils/html';
+import type { VideoData } from '@/lib/hooks/useVideoPlayer';
 
 /**
  * Split person names by common delimiters (comma, Chinese comma, slash).
@@ -15,8 +16,17 @@ function splitPersonNames(str: string): string[] {
   return str.split(/[,，/]/).map(s => s.trim()).filter(Boolean);
 }
 
+/**
+ * The subset of the video payload that this component renders. `VideoData` does not
+ * declare every field that may be present on the API response, so the extra optional
+ * fields are declared here.
+ */
+type VideoMetadataData = VideoData & {
+  vod_lang?: string;
+};
+
 interface VideoMetadataProps {
-  videoData: any;
+  videoData: VideoMetadataData | null | undefined;
   source: string | null;
   title?: string | null;
 }

@@ -112,14 +112,33 @@ export function useSpatialNavigation(enabled: boolean) {
       const focused = document.activeElement as HTMLElement | null;
       if (focused?.closest('[data-no-spatial]')) return;
 
+      // TV 可聚焦候选:
+      //  1) [data-focusable]  —— 首页/搜索页/导航栏使用
+      //  2) 原生可聚焦元素   —— 播放页 (EpisodeList 用 tabIndex, 按钮用 <button>) 原本一个都没有
+      //     播放页之前 0 个候选 -> 方向键直接 return -> 遥控完全失效
+      const FOCUSABLE_SELECTOR = [
+        '[data-focusable]:not([disabled]):not([aria-hidden="true"])',
+        'button:not([disabled]):not([aria-hidden="true"])',
+        '[tabindex]:not([tabindex="-1"]):not([disabled]):not([aria-hidden="true"])',
+        'a[href]:not([aria-hidden="true"])',
+        'input:not([disabled]):not([aria-hidden="true"])',
+        'select:not([disabled]):not([aria-hidden="true"])',
+      ].join(', ');
+
       const focusableElements = Array.from(
-        document.querySelectorAll('[data-focusable]:not([disabled]):not([aria-hidden="true"])')
+        document.querySelectorAll(FOCUSABLE_SELECTOR)
       ).filter(el => {
         // Filter out elements inside [data-no-spatial]
         if (el.closest('[data-no-spatial]')) return false;
         // Filter out hidden elements
         const rect = getRect(el);
-        return rect.width > 0 && rect.height > 0;
+        if (rect.width <= 0 || rect.height <= 0) return false;
+        // 排除 video/audio 及其内部元素 (占位但不可导航)
+        if (el.closest('video, audio')) return false;
+        return true;
+      }).filter((el, i, arr) => {
+        // 去重: 一个 button 内部若还有 button 不会发生, 但 input+label 可能重复
+        return arr.indexOf(el) === i;
       });
 
       if (focusableElements.length === 0) return;
@@ -128,8 +147,23 @@ export function useSpatialNavigation(enabled: boolean) {
       const isAlreadyFocused = currentFocused && focusableElements.includes(currentFocused);
 
       if (!isAlreadyFocused) {
-        // Focus the first element
-        (focusableElements[0] as HTMLElement).focus();
+        // 焦点不在候选里: 优先选与当前焦点同区域的最接近元素, 否则第一个
+        let target: HTMLElement | null = null;
+        if (currentFocused && currentFocused !== document.body) {
+          const cr = getRect(currentFocused);
+          const cc = getCenter(cr);
+          let bestScore = Infinity;
+          for (const cand of focusableElements) {
+            const cRect = getRect(cand);
+            const cCenter = getCenter(cRect);
+            const dx = Math.abs(cCenter.x - cc.x);
+            const dy = Math.abs(cCenter.y - cc.y);
+            const score = dx + dy * 2;
+            if (score < bestScore) { bestScore = score; target = cand as HTMLElement; }
+          }
+        }
+        if (!target) target = focusableElements[0] as HTMLElement;
+        target.focus();
         e.preventDefault();
         return;
       }
@@ -141,9 +175,27 @@ export function useSpatialNavigation(enabled: boolean) {
         e.preventDefault();
       }
     } else if (e.key === 'Enter') {
-      // Trigger click on focused element
+      // Trigger activation on focused element
+      // 原实现只认 data-focusable -> 播放页 Enter 无效
       const focused = document.activeElement as HTMLElement;
-      if (focused && focused.hasAttribute('data-focusable')) {
+      if (!focused || focused === document.body) return;
+
+      const isActivatable =
+        focused.hasAttribute('data-focusable') ||
+        focused.tagName === 'BUTTON' ||
+        focused.tagName === 'A' ||
+        focused.tagName === 'INPUT' ||
+        focused.tagName === 'SELECT' ||
+        focused.getAttribute('tabindex') !== null;
+
+      if (isActivatable) {
+        // 视频本身获得焦点时, Enter 切换播放/暂停
+        if (focused.tagName === 'VIDEO') {
+          const v = focused as HTMLVideoElement;
+          if (v.paused) { void v.play().catch(() => {}); } else { v.pause(); }
+          e.preventDefault();
+          return;
+        }
         focused.click();
         e.preventDefault();
       }

@@ -1,8 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll';
 import { settingsStore } from '@/lib/store/settings-store';
+import type { SourceSubscription, VideoSource } from '@/lib/types';
 
-interface PremiumVideo {
+/**
+ * Persisted settings may carry extra fields on a subscription (`group`, `enabled`) that are
+ * not part of the declared `SourceSubscription` shape, so they are read through this
+ * structural type.
+ */
+type PremiumCandidate = (VideoSource | SourceSubscription) & {
+    group?: string;
+    enabled?: boolean;
+};
+
+export interface PremiumVideo {
     vod_id: string | number;
     vod_name: string;
     vod_pic?: string;
@@ -34,8 +45,8 @@ export function usePremiumContent(categoryValue: string) {
             const premiumSources = [
                 ...settings.premiumSources,
                 // Check if any subscription sources are marked as premium
-                ...settings.subscriptions.filter(s => (s as any).group === 'premium')
-            ].filter(s => (s as any).enabled !== false);
+                ...settings.subscriptions.filter(s => (s as PremiumCandidate).group === 'premium')
+            ].filter(s => (s as PremiumCandidate).enabled !== false);
 
             if (premiumSources.length === 0) {
                 setLoading(false);
@@ -92,8 +103,8 @@ export function usePremiumContent(categoryValue: string) {
             const settings = settingsStore.getSettings();
             const premiumSources = [
                 ...settings.premiumSources,
-                ...settings.subscriptions.filter(s => (s as any).group === 'premium')
-            ].filter(s => (s as any).enabled !== false);
+                ...settings.subscriptions.filter(s => (s as PremiumCandidate).group === 'premium')
+            ].filter(s => (s as PremiumCandidate).enabled !== false);
 
             const currentSourceCount = premiumSources.length;
 

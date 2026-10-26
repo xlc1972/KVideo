@@ -2,6 +2,27 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
+/** A single movie/tv entry returned by the Douban search endpoint. */
+type DoubanSubject = {
+    id?: string;
+    title?: string;
+    cover?: string;
+    year?: string;
+    rating?: { value?: number };
+    url?: string;
+    subtype?: string;
+    directors?: string[];
+    actors?: string[];
+};
+
+/** Shape of the Douban search response. */
+type DoubanResponse = {
+    subjects?: DoubanSubject[];
+    total?: number;
+    start?: number;
+    count?: number;
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tag = searchParams.get('tag') || '热门';
@@ -24,11 +45,11 @@ export async function GET(request: Request) {
       throw new Error(`Douban API returned ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as DoubanResponse;
 
     // 转换图片链接使用代理
     if (data.subjects && Array.isArray(data.subjects)) {
-      data.subjects = data.subjects.map((item: any) => ({
+      data.subjects = data.subjects.map((item: DoubanSubject) => ({
         ...item,
         cover: item.cover ? `/api/douban/image?url=${encodeURIComponent(item.cover)}` : item.cover,
       }));

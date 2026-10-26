@@ -6,7 +6,16 @@ import { settingsStore } from '@/lib/store/settings-store';
 /**
  * Check if a video's category matches any blocked keyword.
  */
-function isCategoryBlocked(video: any, blockedCategories: string[]): boolean {
+/**
+ * Upstream sources may expose a few extra fields that are not part of the shared `Video`
+ * interface (`vod_class`, `sourceDisplayName`). They are read defensively.
+ */
+type StreamVideo = Video & {
+    vod_class?: string;
+    sourceDisplayName?: string;
+};
+
+function isCategoryBlocked(video: StreamVideo, blockedCategories: string[]): boolean {
     if (blockedCategories.length === 0) return false;
     const typeName = (video.type_name || video.vod_class || '').toLowerCase();
     return blockedCategories.some(cat => typeName.includes(cat.toLowerCase()));
@@ -63,9 +72,9 @@ export async function processSearchStream({
                     onStart(data.totalSources);
                 } else if (data.type === 'videos') {
                     const newVideos: Video[] = data.videos
-                        .filter((video: any) => hasMinimumMatch(video.vod_name, currentQuery))
-                        .filter((video: any) => !isCategoryBlocked(video, blockedCategories))
-                        .map((video: any) => ({
+                        .filter((video: StreamVideo) => hasMinimumMatch(video.vod_name, currentQuery))
+                        .filter((video: StreamVideo) => !isCategoryBlocked(video, blockedCategories))
+                        .map((video: StreamVideo) => ({
                             ...video,
                             sourceName: video.sourceDisplayName || getSourceName(video.source),
                             isNew: true,

@@ -65,12 +65,12 @@ export function HistoryItem({ item, onRemove, isPremium = false }: HistoryItemPr
         href={getVideoUrl()}
         onClick={(e) => {
           e.preventDefault();
-          handleClick(e as any);
+          handleClick(e);
           if (!e.ctrlKey && !e.metaKey) {
             window.location.href = getVideoUrl();
           }
         }}
-        onAuxClick={(e) => handleClick(e as any)}
+        onAuxClick={(e) => handleClick(e)}
         className="block"
       >
         <div className="flex gap-3">

@@ -93,6 +93,12 @@ object PlaybackUrlResolver {
         return null
     }
 
+    /** 是否已经是绝对地址 (带 scheme) */
+    fun isAbsolute(url: String): Boolean {
+        val u = url.trim()
+        return u.startsWith("http://") || u.startsWith("https://")
+    }
+
     /** 相对地址补成绝对地址 */
     fun toAbsolute(url: String, siteBase: String): String {
         if (url.startsWith("http://") || url.startsWith("https://")) return url

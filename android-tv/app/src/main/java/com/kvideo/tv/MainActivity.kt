@@ -39,6 +39,8 @@ class MainActivity : ComponentActivity() {
         private const val PREFS_NAME = "kvideo_tv_settings"
         private const val PREF_SERVER_URL = "server_url"
         private const val TAG = "KVideoMainActivity"
+        /** 同一播放地址的去重窗口 (毫秒) */
+        private const val NATIVE_PLAY_DEDUP_MS = 3000L
     }
 
     private lateinit var webView: WebView
@@ -63,6 +65,12 @@ class MainActivity : ComponentActivity() {
     private var pageLoadFinished: Boolean = false
     /** 超时兜底定时器 */
     private var loadTimeoutRunnable: Runnable? = null
+    /**
+     * 最近一次交给原生播放器的地址 + 时间戳。
+     * 站点的 React effect 可能重跑 (StrictMode / 依赖变化), 不做幂等会重复拉起播放器。
+     */
+    private var lastNativePlayUrl: String = ""
+    private var lastNativePlayAt: Long = 0L
     private var debugDialog: android.app.Dialog? = null
     private var nativeHome: androidx.compose.ui.platform.ComposeView? = null
 
@@ -851,6 +859,51 @@ class MainActivity : ComponentActivity() {
     }
 
     private inner class AndroidPlayerBridge {
+        /**
+         * 用原生 Media3 播放器播这个地址。
+         *
+         * 站点播放页在检测到 App 桥存在时, 会把最终播放地址交给这里,
+         * 而不是自己在 WebView 里用 MSE 播 —— 老电视的 WebView 播 HLS 常常黑屏。
+         *
+         * 返回 true 表示已交给原生播放器, false 表示请站点继续用 WebView 播。
+         */
+        @JavascriptInterface
+        fun playNative(url: String, title: String): Boolean {
+            // 幂等: 同一个地址在短时间内只拉起一次 (站点的 effect 会重跑)
+            val now = android.os.SystemClock.elapsedRealtime()
+            if (NativePlayDedup.shouldSkip(lastNativePlayUrl, lastNativePlayAt, now, url)) {
+                Log.i(TAG, "playNative: dedup, same url within ${NativePlayDedup.DEDUP_WINDOW_MS}ms")
+                return true
+            }
+
+            val siteBase = getConfiguredUrl()
+            val resolution = PlaybackUrlResolver.resolve(url, siteBase)
+            if (resolution !is PlaybackUrlResolver.Resolution.Native) {
+                Log.i(TAG, "playNative: not native-playable, keep WebView: $url")
+                return false
+            }
+            if (!PlaybackUrlResolver.isMedia3Compatible(resolution.url)) {
+                Log.w(TAG, "playNative: unsupported scheme, keep WebView: $resolution.url")
+                return false
+            }
+            lastNativePlayUrl = url
+            lastNativePlayAt = now
+            runOnUiThread {
+                try {
+                    PlayerActivity.start(
+                        context = this@MainActivity,
+                        url = resolution.url,
+                        title = title
+                    )
+                } catch (error: Exception) {
+                    Log.e(TAG, "playNative: failed to start PlayerActivity", error)
+                    // 起不来就退回 WebView
+                    Toast.makeText(this@MainActivity, "原生播放器启动失败", Toast.LENGTH_SHORT).show()
+                }
+            }
+            return true
+        }
+
         @JavascriptInterface
         fun isPictureInPictureSupported(): Boolean = this@MainActivity.isPictureInPictureSupported()
 

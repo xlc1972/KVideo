@@ -22,6 +22,8 @@ color call_notification_answer_color
 color call_notification_decline_color
 color notification_action_color_filter
 color notification_icon_bg_color
+color vector_tint_color
+color vector_tint_theme_color
 dimen compat_button_inset_horizontal_material
 dimen compat_button_inset_vertical_material
 dimen compat_button_padding_horizontal_material
@@ -44,6 +46,7 @@ dimen notification_small_icon_size_as_large
 dimen notification_subtext_size
 dimen notification_top_pad
 dimen notification_top_pad_large_text
+drawable abc_vector_test
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
@@ -102,9 +105,13 @@ id action_divider
 id action_image
 id action_text
 id actions
+id androidx_compose_ui_view_composition_context
 id async
 id blocking
 id chronometer
+id coil_request_manager
+id compose_view_saveable_id_tag
+id consume_window_insets_tag
 id dialog_button
 id edit_text_id
 id error_container
@@ -118,9 +125,12 @@ id error_wall_button
 id forever
 id fullscreen_container
 id hide_ime_id
+id hide_in_inspector_tag
 id icon
 id icon_group
 id info
+id inspection_slot_table_set
+id is_pooling_container_tag
 id italic
 id line1
 id line3
@@ -129,6 +139,7 @@ id notification_background
 id notification_main_column
 id notification_main_column_container
 id open_button
+id pooling_container_listener_holder_tag
 id report_drawn
 id right_icon
 id right_side
@@ -159,6 +170,7 @@ id view_tree_on_back_pressed_dispatcher_owner
 id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id webview
+id wrapped_composition_tag
 integer status_bar_notification_info_maxnum
 layout activity_main
 layout custom_dialog
@@ -184,16 +196,30 @@ string call_notification_hang_up_action
 string call_notification_incoming_text
 string call_notification_ongoing_text
 string call_notification_screening_text
+string close_drawer
+string close_sheet
 string debug_close
 string debug_copied
 string debug_copy
 string debug_title
+string default_error_message
+string default_popup_window_title
+string dropdown_menu
 string error_detail_format
 string error_hint
 string error_retry
 string error_settings
 string error_title
 string error_wall
+string in_progress
+string indeterminate
+string navigation_menu
+string not_selected
+string off
+string on
+string range_end
+string range_start
+string selected
 string setup_description
 string setup_footer
 string setup_hint
@@ -203,6 +229,11 @@ string status_first_launch
 string status_invalid_url
 string status_ready
 string status_settings_hint
+string switch_role
+string tab
+string template_percent
+string tooltip_description
+string tooltip_label
 string update_already_latest
 string update_available
 string update_check_failed
@@ -218,6 +249,9 @@ string update_progress_unknown
 string update_title
 string update_verifying
 style AppTheme
+style DialogWindowTheme
+style FloatingDialogTheme
+style FloatingDialogWindowTheme
 style TextAppearance_Compat_Notification
 style TextAppearance_Compat_Notification_Info
 style TextAppearance_Compat_Notification_Line2
@@ -225,10 +259,15 @@ style TextAppearance_Compat_Notification_Time
 style TextAppearance_Compat_Notification_Title
 style Widget_Compat_NotificationActionContainer
 style Widget_Compat_NotificationActionText
+styleable AnimatedStateListDrawableCompat android_dither android_visible android_variablePadding android_constantSize android_enterFadeDuration android_exitFadeDuration
+styleable AnimatedStateListDrawableItem android_id android_drawable
+styleable AnimatedStateListDrawableTransition android_drawable android_toId android_fromId android_reversible
 styleable Capability queryPatterns shortcutMatchRequired
 styleable ColorStateListItem android_color android_alpha android_lStar alpha lStar
 styleable FontFamily fontProviderAuthority fontProviderCerts fontProviderFetchStrategy fontProviderFetchTimeout fontProviderPackage fontProviderQuery fontProviderSystemFontFamily
 styleable FontFamilyFont android_font android_fontWeight android_fontStyle android_ttcIndex android_fontVariationSettings font fontStyle fontVariationSettings fontWeight ttcIndex
 styleable GradientColor android_startColor android_endColor android_type android_centerX android_centerY android_gradientRadius android_tileMode android_centerColor android_startX android_startY android_endX android_endY
 styleable GradientColorItem android_color android_offset
+styleable StateListDrawable android_dither android_visible android_variablePadding android_constantSize android_enterFadeDuration android_exitFadeDuration
+styleable StateListDrawableItem android_drawable
 xml file_paths

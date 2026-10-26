@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
     private var lastLoadError: String? = null
     private var lastLoadedUrl: String = ""
     private var debugDialog: android.app.Dialog? = null
+    private var nativeHome: androidx.compose.ui.platform.ComposeView? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +78,12 @@ class MainActivity : ComponentActivity() {
         saveButton = findViewById(R.id.save_button)
 
         saveButton.setOnClickListener {
+            // 电视设备: 默认走原生电视墙 (Compose for TV), WebView 留给详情/播放/搜索
+        if (isTvDevice()) {
+            showTvWall()
+        } else {
             openConfiguredUrl()
+        }
         }
         urlInput.setOnEditorActionListener { _, actionId, event ->
             val isKeyboardConfirmAction = actionId == EditorInfo.IME_NULL ||
@@ -330,6 +336,7 @@ class MainActivity : ComponentActivity() {
 
     private fun openConfiguredUrl() {
         hideTvWall()
+        hideNativeHome()
         val normalizedUrl = normalizeUrl(urlInput.text.toString())
         if (!isValidUrl(normalizedUrl)) {
             statusText.text = getString(R.string.status_invalid_url)
@@ -477,12 +484,47 @@ class MainActivity : ComponentActivity() {
      */
     private fun showTvWall() {
         val root = findViewById<android.widget.FrameLayout>(R.id.root_container) ?: return
-        val existing = tvWall
-        if (existing != null) {
-            existing.visibility = View.VISIBLE
-            existing.build(getConfiguredUrl())
+
+        // 已存在原生 Compose 电视墙 -> 直接显示
+        nativeHome?.let {
+            it.visibility = View.VISIBLE
             return
         }
+
+        // 已有旧版 View 电视墙 -> 复用
+        tvWall?.let {
+            it.visibility = View.VISIBLE
+            it.build(getConfiguredUrl())
+            return
+        }
+
+        // 优先: 原生 Compose for TV 电视墙 (焦点由系统管理, 电视上最可靠)
+        try {
+            val compose = androidx.compose.ui.platform.ComposeView(this).apply {
+                setContent {
+                    TvHomeScreen(
+                        baseUrl = getConfiguredUrl(),
+                        onOpenWeb = { url ->
+                            hideNativeHome()
+                            webView.visibility = View.VISIBLE
+                            webView.loadUrl(url)
+                        }
+                    )
+                }
+                setBackgroundColor(android.graphics.Color.parseColor("#0B0D12"))
+            }
+            nativeHome = compose
+            root.addView(compose, android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+            ))
+            compose.requestFocus()
+            return
+        } catch (e: Exception) {
+            Log.e(TAG, "native home unavailable, fallback to view wall", e)
+        }
+
+        // 兜底: 旧版 View 电视墙
         val wall = TvWallView(this)
         tvWall = wall
         root.addView(wall, android.widget.FrameLayout.LayoutParams(
@@ -502,11 +544,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun hideNativeHome() {
+        nativeHome?.visibility = View.GONE
+    }
+
+    private fun isNativeHomeVisible(): Boolean = nativeHome?.visibility == View.VISIBLE
+
     private fun hideTvWall() {
         tvWall?.visibility = View.GONE
     }
 
-    private fun isTvWallVisible(): Boolean = tvWall?.visibility == View.VISIBLE
+    /**
+     * 判断是否电视设备 (非手机)。TV 上默认使用原生电视墙。
+     */
+    private fun isTvDevice(): Boolean {
+        return try {
+            val uiMode = getSystemService(android.content.Context.UI_MODE_SERVICE)
+                as android.content.res.Configuration
+            uiMode.uiMode and android.content.res.Configuration.UI_MODE_TYPE_MASK ==
+                android.content.res.Configuration.UI_MODE_TYPE_TELEVISION
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isTvWallVisible(): Boolean =
+        tvWall?.visibility == View.VISIBLE || nativeHome?.visibility == View.VISIBLE
 
     /**
      * 查询当前生效的 WebView 组件包名 (电视上系统 WebView 版本差异是常见坑)。

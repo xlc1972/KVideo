@@ -13,3 +13,16 @@
 
 # org.json (Android 内置, 但保险)
 -dontwarn org.json.**
+
+# ---- Compose for TV ----
+-keep class androidx.compose.** { *; }
+-keep class androidx.tv.** { *; }
+-keep class coil.** { *; }
+-dontwarn androidx.compose.**
+-dontwarn androidx.tv.**
+-dontwarn coil.**
+
+# Compose 反射调用
+-keepclassmembers class ** {
+    @androidx.compose.runtime.Composable *;
+}

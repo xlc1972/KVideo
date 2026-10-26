@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
         applyImmersiveMode()
 
         setContentView(R.layout.activity_main)
+        installProbeBridge()
         webView = findViewById(R.id.webview)
         setupContainer = findViewById(R.id.setup_container)
         fullscreenContainer = findViewById(R.id.fullscreen_container)
@@ -121,6 +122,16 @@ class MainActivity : ComponentActivity() {
                 databaseEnabled = true
                 // 注入 Android TV UA, 让 KVideo 前端 TV detection 命中 (TCL/小米/海信等非 Google TV 也覆盖)
                 userAgentString = settings.userAgentString + " Android TV"
+                // 电视 WebView 常见问题: 图片解码/合成被限制, 关掉这些可让 <img> 正常渲染
+                blockNetworkImage = false
+                blockNetworkLoads = false
+                loadsImagesAutomatically = true
+                // 允许 WebView 自己处理视频, 否则播放端全屏时遥控键被吞
+                setGeolocationEnabled(false)
+            }
+            // 电视上 LAYER_TYPE_HARDWARE 在部分厂商 GPU 上会白屏/花屏, 用 SOFTWARE 更稳
+            if (isTvDevice()) {
+                webView.setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
             }
 
             webViewClient = object : WebViewClient() {
@@ -134,6 +145,8 @@ class MainActivity : ComponentActivity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     lastLoadedUrl = url ?: lastLoadedUrl
+                    // 页面加载完做一次能力探测 (延迟等 React 挂载完)
+                    webView.postDelayed({ probeWebViewCapabilities() }, 2500)
                     // 页面加载完成但内容为空 —— 电视上常见空 DOM, 也当作失败处理
                     view?.postDelayed({
                         view.evaluateJavascript(
@@ -194,6 +207,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
             webChromeClient = object : WebChromeClient() {
+            // 捕获 JS 运行时错误 (电视上遥控失效/图片不显示的真因)
+            override fun onConsoleMessage(msg: android.webkit.ConsoleMessage): Boolean {
+                try {
+                    if (msg.messageLevel() == android.webkit.ConsoleMessage.MessageLevel.ERROR) {
+                        jsErrors.add("[" + msg.sourceId().substringAfterLast('/') + ":" + msg.lineNumber() + "] " + msg.message().take(220))
+                        if (jsErrors.size > 40) jsErrors.poll()
+                    }
+                } catch (e: Exception) { }
+                return super.onConsoleMessage(msg)
+            }
+
                 override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
                     if (view == null || callback == null) {
                         callback?.onCustomViewHidden()
@@ -591,8 +615,94 @@ class MainActivity : ComponentActivity() {
     /**
      * 诊断对话框: 显示 UA / URL / 加载状态 / WebView 版本, 便于远程判断电视端问题。
      */
+
+    // ================= TV 真机诊断: JS 错误 + WebView 能力探测 =================
+
+    /** 收集 WebView 里的 JS 运行时错误 (遥控失效/图片不显示时唯一的真相来源) */
+    private val jsErrors = java.util.concurrent.ConcurrentLinkedQueue<String>()
+
+    /** WebView 能力探测结果 (JS 执行后回填) */
+    @Volatile private var jsCapabilities: String = "(未探测)"
+
+    /**
+     * 在页面里注入能力探测脚本。
+     * 老电视 WebView (Chrome 83 / 厂商魔改) 常常缺 API, 导致 React/Next 运行时直接抛错,
+     * 结果就是: HTML 文字在, 但图片不显示、遥控器完全无效。
+     */
+    private fun probeWebViewCapabilities() {
+        val js = """
+        (function(){
+          function has(n){ try { return typeof window[n] !== 'undefined'; } catch(e){ return false; } }
+          var checks = [
+            'TextDecoder','TextEncoder','fetch','AbortController','IntersectionObserver',
+            'ResizeObserver','MutationObserver','structuredClone','URL','URLSearchParams',
+            'Promise','Symbol','Map','Set','WeakMap','Proxy','Reflect',
+            'requestAnimationFrame','matchMedia','requestIdleCallback',
+            'Object.fromEntries','Object.entries','Array.from','Array.includes',
+            'String.prototype.padStart','String.prototype.replaceAll',
+            'Element.prototype.matches','Element.prototype.closest'
+          ];
+          var ok = [], miss = [];
+          checks.forEach(function(n){
+            var parts = n.split('.');
+            var cur = window, good = true;
+            for (var i=0;i<parts.length;i++){
+              if (cur == null) { good=false; break; }
+              cur = cur[parts[i]];
+            }
+            (good ? ok : miss).push(n);
+          });
+          // CSS 特性
+          var css = [];
+          try {
+            if (!CSS.supports('aspect-ratio','1/1')) css.push('no aspect-ratio');
+            if (!CSS.supports('selector(:has(*))')) css.push('no :has()');
+            if (!CSS.supports('content-visibility','hidden')) css.push('no content-visibility');
+            if (!CSS.supports('gap','1px')) css.push('no gap');
+          } catch(e){ css.push('CSS.supports ERR '+e.message); }
+          var out = 'OK[' + ok.length + ']: ' + ok.join(',') + ' || MISS[' + miss.length + ']: ' + miss.join(',')
+                    + ' || CSS: ' + (css.length?css.join(';'):'all-ok')
+                    + ' || UA: ' + navigator.userAgent.slice(0,120);
+          if (window.React) out += ' || React:' + React.version;
+          if (window.next) out += ' || next.router:' + (next.version||'?');
+          try { out += ' || viewport:' + window.innerWidth + 'x' + window.innerHeight + ' dpr:' + window.devicePixelRatio; } catch(e){}
+          try {
+            var imgs = document.querySelectorAll('img');
+            var loaded = 0, broken = 0, pending = 0;
+            imgs.forEach(function(i){
+              if (!i.currentSrc) { pending++; }
+              else if (i.complete) { if (i.naturalWidth > 0) loaded++; else broken++; }
+              else { pending++; }
+            });
+            out += ' || IMG total:' + imgs.length + ' loaded:' + loaded + ' broken:' + broken + ' pending:' + pending;
+            var sheets = document.styleSheets.length;
+            out += ' || sheets:' + sheets;
+          } catch(e){ out += ' || IMG ERR ' + e.message; }
+          if (window.__kvideoProbe) window.__kvideoProbe(out);
+        })();
+        """.trimIndent()
+
+        webView.evaluateJavascript(js, null)
+    }
+
+    /** 在 WebView 里注册一个 JS 桥, 能力探测结果通过它回传 */
+    private fun installProbeBridge() {
+        try {
+            webView.addJavascriptInterface(object {
+                @android.webkit.JavascriptInterface
+                fun report(result: String) {
+                    jsCapabilities = result
+                }
+            }, "__kvideoProbe")
+        } catch (e: Exception) {
+            Log.w(TAG, "probe bridge failed", e)
+        }
+    }
+
     private fun showDebugDialog() {
         if (debugDialog?.isShowing == true) return
+        // 先刷新一次能力探测, 让对话框显示最新数据
+        probeWebViewCapabilities()
         val info = buildString {
             appendLine("URL: ${lastLoadedUrl.ifBlank { "(未加载)" }}")
             appendLine("错误: ${lastLoadError ?: "无"}")
@@ -606,6 +716,16 @@ class MainActivity : ComponentActivity() {
             appendLine("density: ${resources.displayMetrics.density}")
             appendLine()
             appendLine("版本: ${packageManager.getPackageInfo(packageName, 0).versionName} (${packageManager.getPackageInfo(packageName, 0).versionCode})")
+            appendLine()
+            appendLine("--- JS 能力探测 ---")
+            appendLine(jsCapabilities)
+            appendLine()
+            appendLine("--- JS 错误 (最近 ${jsErrors.size} 条) ---")
+            if (jsErrors.isEmpty()) {
+                appendLine("(无)")
+            } else {
+                jsErrors.take(12).forEach { appendLine(it) }
+            }
         }
 
         val scroll = android.widget.ScrollView(this)

@@ -13,6 +13,23 @@ import { filterM3u8Ad } from '@/lib/utils/m3u8-utils';
 import { useRuntimeFeatures } from '@/components/RuntimeFeaturesProvider';
 import { tryNativePlayback } from '@/lib/utils/native-player-bridge';
 
+/**
+ * 把站点内的相对地址补成绝对地址。
+ *
+ * 原生播放器 (Android Media3) 不认识 "/api/proxy?url=..." 这种站点内路径,
+ * 必须给它完整的 https://host/... 才能发请求。
+ */
+function toAbsoluteUrl(url: string): string {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    if (typeof window === 'undefined') return url;
+    try {
+        return new URL(url, window.location.origin).toString();
+    } catch {
+        return url;
+    }
+}
+
 interface UseHlsPlayerProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
     src: string;
@@ -41,7 +58,8 @@ export function useHlsPlayer({
 
         // Android TV 壳: 优先交给原生 Media3 播放器 (老电视 WebView 播 HLS 容易黑屏)
         // 桥不存在 (普通浏览器) 或 App 判定不可原生播时, 继续走下面的 WebView 流程。
-        if (tryNativePlayback(src)) {
+        // 原生播放器需要绝对地址, 这里先把站点内的相对路径补全。
+        if (tryNativePlayback(toAbsoluteUrl(src))) {
             console.info('[NativePlayer] handed off to Android native player');
             return;
         }

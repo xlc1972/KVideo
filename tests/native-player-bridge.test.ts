@@ -35,11 +35,15 @@ test('hls player hands off to the android native player before setting up hls.js
     /import \{ tryNativePlayback \} from '@\/lib\/utils\/native-player-bridge';/,
   );
 
+  // 原生播放器需要绝对地址, 交接前必须先补全
+  assert.match(source, /tryNativePlayback\(toAbsoluteUrl\(src\)\)/);
+  assert.match(source, /function toAbsoluteUrl\(url: string\): string/);
+  assert.match(source, /new URL\(url, window\.location\.origin\)/);
+
   // 原生接管必须发生在创建 Hls 实例之前
-  const handoff = source.indexOf('tryNativePlayback(src)');
+  const handoff = source.indexOf('tryNativePlayback(toAbsoluteUrl(src))');
   const hlsCreate = source.indexOf('new Hls(');
   assert.ok(handoff > -1, 'useHlsPlayer should call tryNativePlayback');
   assert.ok(hlsCreate > -1, 'useHlsPlayer should still create Hls for browsers');
   assert.ok(handoff < hlsCreate, 'native handoff must happen before Hls.js setup');
 });
-

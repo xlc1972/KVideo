@@ -104,7 +104,7 @@ class PlayerActivity : android.app.Activity() {
 
     private fun buildPlayer(url: String): ExoPlayer {
         val httpFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("KVideo-AndroidTV/4.10.2")
+            .setUserAgent("KVideo-AndroidTV/4.10.3")
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(15000)
             .setReadTimeoutMs(30000)

@@ -20,8 +20,8 @@ android {
         applicationId = "com.djjk.ziqidonglai.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 25
-        versionName = "4.9.25"
+        versionCode = 41002
+        versionName = "4.10.2"
 
         buildConfigField("String", "DEFAULT_KVIDEO_URL", "\"$defaultKVideoUrl\"")
     }
@@ -69,6 +69,11 @@ android {
         jvmTarget = "17"
     }
 
+    testOptions {
+        // 纯逻辑单测会碰到 android.util.Log —— 允许返回默认值而不是抛 "not mocked"
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -79,6 +84,13 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.webkit:webkit:1.9.0")
+
+    // ---- Media3 (ExoPlayer): 原生 HLS 播放器 ----
+    // WebView 内播 HLS 依赖浏览器 MSE, 老电视的 WebView 版本不一, 表现为
+    // readyState=0 / 黑屏。Media3 直接用平台的 MediaCodec, 不依赖 WebView。
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
 
     // ---- Compose for TV: 原生电视墙 (焦点系统由系统管理, 不依赖 JS) ----
     // tv-material 1.0.1 -> Compose 1.6.8, 与 compileSdk 34 / Kotlin 1.9.22 兼容。

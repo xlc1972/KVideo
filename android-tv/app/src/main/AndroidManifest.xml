@@ -47,6 +47,16 @@
             </intent-filter>
         </activity>
 
+        <!-- 原生播放器 (Media3) -->
+        <activity
+            android:name=".PlayerActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/AppTheme" />
+
         <!-- APK 自更新: 授予安装器读取下载文件的权限 -->
         <provider
             android:name="androidx.core.content.FileProvider"

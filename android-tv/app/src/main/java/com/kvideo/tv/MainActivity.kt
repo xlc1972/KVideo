@@ -57,6 +57,12 @@ class MainActivity : ComponentActivity() {
     private var tvWall: TvWallView? = null
     private var lastLoadError: String? = null
     private var lastLoadedUrl: String = ""
+    /** 页面加载开始时间 (elapsedRealtime 基准) */
+    private var pageLoadStartedAt: Long = 0L
+    /** 页面是否已 onPageFinished */
+    private var pageLoadFinished: Boolean = false
+    /** 超时兜底定时器 */
+    private var loadTimeoutRunnable: Runnable? = null
     private var debugDialog: android.app.Dialog? = null
     private var nativeHome: androidx.compose.ui.platform.ComposeView? = null
 
@@ -140,11 +146,14 @@ class MainActivity : ComponentActivity() {
                     lastLoadedUrl = url ?: lastLoadedUrl
                     lastLoadError = null
                     hideErrorOverlay()
+                    startLoadTimeoutWatchdog()
                 }
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     lastLoadedUrl = url ?: lastLoadedUrl
+                    pageLoadFinished = true
+                    cancelLoadTimeoutWatchdog()
                     // 页面加载完做一次能力探测 (延迟等 React 挂载完)
                     webView.postDelayed({ probeWebViewCapabilities() }, 2500)
                     // 页面加载完成但内容为空 —— 电视上常见空 DOM, 也当作失败处理
@@ -456,6 +465,39 @@ class MainActivity : ComponentActivity() {
             hideErrorOverlay()
             showSetup(getString(R.string.status_settings_hint))
         }
+    }
+
+    /**
+     * 启动页面加载超时看门狗。
+     *
+     * 电视上页面卡住时不会自动报错, 只会一直白屏, 用户按遥控器没反应。
+     * 12 秒还没 onPageFinished 就显示可操作的错误页 (重试 / 返回 / 设置)。
+     */
+    private fun startLoadTimeoutWatchdog() {
+        cancelLoadTimeoutWatchdog()
+        pageLoadStartedAt = android.os.SystemClock.elapsedRealtime()
+        pageLoadFinished = false
+        val runnable = Runnable {
+            val elapsed = android.os.SystemClock.elapsedRealtime() - pageLoadStartedAt
+            when (LoadTimeoutPolicy.decide(pageLoadFinished, elapsed)) {
+                LoadTimeoutPolicy.Decision.TIMEOUT -> {
+                    Log.w("KVideoLoad", "page load timeout after ${elapsed}ms: $lastLoadedUrl")
+                    lastLoadError = "加载超时"
+                    showErrorOverlay(
+                        "页面加载超时",
+                        "超过 ${elapsed / 1000} 秒仍未加载完成\n可能是网络较慢或服务器暂时不可用"
+                    )
+                }
+                else -> Unit
+            }
+        }
+        loadTimeoutRunnable = runnable
+        webView.postDelayed(runnable, LoadTimeoutPolicy.DEFAULT_TIMEOUT_MS)
+    }
+
+    private fun cancelLoadTimeoutWatchdog() {
+        loadTimeoutRunnable?.let { webView.removeCallbacks(it) }
+        loadTimeoutRunnable = null
     }
 
     private fun showErrorOverlay(title: String, detail: String) {

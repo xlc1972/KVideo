@@ -12,15 +12,22 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * APK 自动更新协调器 —— 极简版。
+ * APK 自动更新协调器 —— 双源 + 完整性校验。
  *
- * 流程: 读 {APK_HOST}/ziqidonglai/version.txt 里的 versionCode
- *       -> 比对本机 versionCode
- *       -> 有新版则提示 -> 下载 {APK_HOST}/ziqidonglai/latest.apk -> 安装
+ * 流程:
+ *   1. [UpdateChecker] 依次查 182 `/api/tv-update` (JSON, 带 sha256) 和
+ *      106 `version.txt` (纯数字), 取版本号最高的可用更新
+ *   2. 与本机 versionCode 比对, 有新版则弹窗
+ *   3. 下载 APK -> **校验 sha256** (服务端提供时必须一致) -> 安装
  *
- * 失败回退: 检查失败 / 下载失败 一律不阻塞使用, 旧版本继续跑。
+ * 为什么双源: 生产上 APK 同时托管在 182 和 106, 家庭宽带下任一个被
+ * 运营商策略挡住都可能导致更新失败, 任意一个可用即可完成更新。
+ *
+ * 失败回退: 检查失败 / 下载失败 / 校验失败 一律不阻塞使用, 旧版本继续跑。
  */
 class AppUpdater(private val activity: MainActivity) {
+    private val checker = UpdateChecker()
+
 
     companion object {
         private const val TAG = "KVideoUpdater"
@@ -32,6 +39,9 @@ class AppUpdater(private val activity: MainActivity) {
         const val APK_BASE = "http://106.15.153.201/ziqidonglai"
         const val VERSION_FILE = "$APK_BASE/version.txt"
         const val APK_FILE = "$APK_BASE/latest.apk"
+
+        /** 182 的更新清单接口 (JSON, 带 sha256) —— 首选源 */
+        const val UPDATE_API = "https://kvideo.djjk.cc/api/tv-update"
     }
 
     private val prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -58,15 +68,21 @@ class AppUpdater(private val activity: MainActivity) {
         checking = true
         Thread {
             try {
-                val info = fetchUpdateInfo()
-                if (info == null) {
-                    Log.i(TAG, "no update info from $VERSION_FILE")
-                    if (!silent) activity.toast(activity.getString(R.string.update_check_failed))
-                } else if (info.versionCode <= currentVersionCode()) {
-                    Log.i(TAG, "already up to date: ${info.versionName}")
-                    if (!silent) activity.toast(activity.getString(R.string.update_already_latest))
-                } else {
-                    activity.runOnUiThread { promptUpdate(info) }
+                when (val result = checker.check(currentVersionCode(), UpdateChecker.HTTP_FETCHER)) {
+                    is UpdateChecker.Result.UpdateAvailable -> {
+                        Log.i(TAG, "update available: ${result.manifest.versionName} " +
+                            "(code=${result.manifest.versionCode}, from=${result.sourceName}, " +
+                            "sha256=${if (result.manifest.hasChecksum) "yes" else "no"})")
+                        activity.runOnUiThread { promptUpdate(result.manifest) }
+                    }
+                    is UpdateChecker.Result.UpToDate -> {
+                        Log.i(TAG, "already up to date")
+                        if (!silent) activity.toast(activity.getString(R.string.update_already_latest))
+                    }
+                    is UpdateChecker.Result.Unavailable -> {
+                        Log.w(TAG, "update sources unavailable: ${result.reasons}")
+                        if (!silent) activity.toast(activity.getString(R.string.update_check_failed))
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "check failed", e)
@@ -88,26 +104,7 @@ class AppUpdater(private val activity: MainActivity) {
         }
     }
 
-    private fun fetchUpdateInfo(): UpdateInfo? {
-        val conn = (URL(VERSION_FILE).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 8000
-            readTimeout = 8000
-            requestMethod = "GET"
-            setRequestProperty("User-Agent", "KVideo-AndroidTV-Updater")
-        }
-        try {
-            if (conn.responseCode != HttpURLConnection.HTTP_OK) {
-                Log.w(TAG, "version.txt HTTP ${conn.responseCode}")
-                return null
-            }
-            val body = conn.inputStream.bufferedReader().use { it.readText() }
-            return UpdateInfo.parseVersionFile(body, APK_FILE)
-        } finally {
-            conn.disconnect()
-        }
-    }
-
-    private fun promptUpdate(info: UpdateInfo) {
+    private fun promptUpdate(info: UpdateManifest) {
         val message = activity.getString(R.string.update_available, info.versionName)
         val alreadyShown = prefs.getInt(PREF_LAST_SEEN_VERSION, 0) == info.versionCode
         if (alreadyShown) {
@@ -127,7 +124,7 @@ class AppUpdater(private val activity: MainActivity) {
             .show()
     }
 
-    private fun startDownload(info: UpdateInfo) {
+    private fun startDownload(info: UpdateManifest) {
         val progressDialog = AlertDialog.Builder(activity)
             .setTitle(R.string.update_downloading)
             .setMessage(activity.getString(R.string.update_preparing))
@@ -165,10 +162,11 @@ class AppUpdater(private val activity: MainActivity) {
         })
 
         progressDialog.show()
-        downloader?.start(info.url, null, downloadDir)
+        // sha256 为空时传 null —— UpdateDownloader 会跳过校验但仍走系统签名校验
+        downloader?.start(info.url, info.sha256.ifEmpty { null }, downloadDir)
     }
 
-    private fun installApk(file: File, info: UpdateInfo) {
+    private fun installApk(file: File, info: UpdateManifest) {
         try {
             val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 FileProvider.getUriForFile(activity, "${activity.packageName}.fileprovider", file)

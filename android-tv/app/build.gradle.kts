@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.djjk.ziqidonglai.tv"
-        minSdk = 26
+        minSdk = 21
         targetSdk = 34
         versionCode = 41003
         versionName = "4.10.3"

@@ -1,6 +1,7 @@
 package com.kvideo.tv
 
 import android.util.Log
+import android.os.Build
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -109,7 +110,12 @@ class UpdateDownloader(private val callback: Callback) {
                     return Result.Failure("HTTP $code", code >= 500 || code == 429)
                 }
 
-                val total = connection.contentLengthLong
+                // contentLengthLong 是 API 24 才有的, getContentLength() 在 API 21-23
+                // 返回 int, 对 APK 体积足够 (最大 2GB)。
+                val total = ApiLevelCompat.resolveContentLength(
+                    longValue = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) connection.contentLengthLong else 0L,
+                    intValue = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) 0 else connection.contentLength
+                )
                 var downloaded = 0L
 
                 connection.inputStream.use { input: InputStream ->

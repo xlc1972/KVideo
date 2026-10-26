@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import androidx.annotation.RequiresApi
 import android.os.Bundle
 import android.util.Log
 import android.util.Rational
@@ -183,8 +184,12 @@ class MainActivity : ComponentActivity() {
                     error: android.webkit.WebResourceError?
                 ) {
                     super.onReceivedError(view, errorRequest, error)
-                    val code = error?.errorCode ?: -1
-                    val desc = error?.description?.toString() ?: "未知错误"
+                    // errorCode / description 是 API 23 才有的。minSdk 21 时
+                    // 拿不到具体原因, 只能给出笼统提示。
+                    val (code, desc) = ApiLevelCompat.describeWebError(
+                        errorCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) error?.errorCode else null,
+                        description = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) error?.description?.toString() else null
+                    )
                     // 只处理主文档错误, 子资源失败不打扰
                     if (errorRequest?.isForMainFrame != true) return
                     val msg = when (code) {
@@ -362,6 +367,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // 该回调自 API 26 起提供。minSdk 21 时系统根本不会调用它,
+    // 但方法签名里的 Configuration / super 调用仍被 lint 判为 NewApi,
+    // 因此整个覆写都放在版本判断之外不可行 —— 改为用 @RequiresApi 标注
+    // 并只在 API 26+ 的系统上由框架调用。
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
@@ -784,7 +794,11 @@ class MainActivity : ComponentActivity() {
             .setView(scroll)
             .setPositiveButton(R.string.debug_close, null)
             .setNeutralButton(R.string.debug_copy) { _, _ ->
-                val clip = getSystemService(android.content.ClipboardManager::class.java)
+                // getSystemService(Class) 是 API 23 才有的重载;
+                // API 21-22 只有 getSystemService(String) 版本。
+                @Suppress("DEPRECATION")
+                val clip = getSystemService(android.content.ClipboardManager::class.java.name)
+                    as? android.content.ClipboardManager
                 clip?.setPrimaryClip(android.content.ClipData.newPlainText("kvideo-debug", info))
                 toast(getString(R.string.debug_copied))
             }
@@ -925,6 +939,13 @@ class MainActivity : ComponentActivity() {
 
             runOnUiThread {
                 try {
+                    // 画中画是 API 26 才有的能力, 低版本直接返回失败。
+                    // 这里必须直接比较 Build.VERSION.SDK_INT —— lint 的 NewApi 检查
+                    // 只能识别字面量比较, 包在辅助函数里会误报。
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        didEnterPiP.set(false)
+                        return@runOnUiThread
+                    }
                     val builder = android.app.PictureInPictureParams.Builder()
                     if (width > 0 && height > 0) {
                         builder.setAspectRatio(Rational(width, height))

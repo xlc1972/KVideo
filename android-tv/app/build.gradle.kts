@@ -20,8 +20,8 @@ android {
         applicationId = "com.djjk.ziqidonglai.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 22
-        versionName = "4.9.22"
+        versionCode = 23
+        versionName = "4.9.23"
 
         buildConfigField("String", "DEFAULT_KVIDEO_URL", "\"$defaultKVideoUrl\"")
     }

@@ -68,21 +68,7 @@ class HomeRepository(private val baseUrl: String) {
         }
         return try {
             val body = httpGet(url)
-            val obj = JSONObject(body)
-            val arr = obj.optJSONArray("subjects") ?: return emptyList()
-            (0 until arr.length()).mapNotNull { i ->
-                val o = arr.optJSONObject(i) ?: return@mapNotNull null
-                val cover = o.optString("cover")
-                if (cover.isBlank()) return@mapNotNull null
-                DoubanSubject(
-                    id = o.optString("id"),
-                    title = o.optString("title"),
-                    rate = o.optString("rate"),
-                    coverUrl = if (cover.startsWith("http")) cover else baseUrl.trimEnd('/') + cover,
-                    playable = o.optBoolean("playable", false),
-                    url = o.optString("url")
-                )
-            }
+            DoubanParser.parseSubjects(body, baseUrl)
         } catch (e: Exception) {
             Log.w(TAG, "row '${spec.label}' failed: ${e.message}")
             emptyList()

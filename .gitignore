@@ -45,3 +45,15 @@ contrast-test-results.json
 
 # local
 android-tv/local.properties
+
+# Android / Gradle 构建产物
+# 注意: 上面的 /build 只匹配根目录, android-tv/app/build 需要单独规则。
+android-tv/app/build/
+android-tv/build/
+android-tv/.gradle/
+android-tv/.kotlin/
+android-tv/captures/
+*.apk
+*.aab
+*.ap_
+*.dex

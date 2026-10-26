@@ -198,12 +198,22 @@ class MainActivity : ComponentActivity() {
                 override fun onReceivedSslError(
                     view: WebView?,
                     handler: android.webkit.SslErrorHandler?,
-                    error: SslError?
+                    error: android.net.http.SslError?
                 ) {
-                    // 家庭网络里常有自签名/过期证书的中间设备, 电视上直接放行比白屏好
-                    Log.w(TAG, "SSL error on ${error?.url}: ${error?.primaryError}")
-                    handler?.proceed()
-                    lastLoadError = "SSL 证书异常 (已放行)"
+                    val url = error?.url ?: ""
+                    // 只对"私有网络地址"放行自签名/过期证书 —— 家庭路由器上的
+                    // 本地调试服务器常带自签证书, 电视上直接报错等于白屏。
+                    // 公网域名 (kvideo.djjk.cc 等) 的证书错误必须拒绝, 否则
+                    // 中间人可以完全劫持电视流量。
+                    if (isPrivateNetworkUrl(url)) {
+                        Log.w(TAG, "SSL error on private host $url: ${error?.primaryError} (放行)")
+                        handler?.proceed()
+                        lastLoadError = "SSL 证书异常 (局域网放行)"
+                    } else {
+                        Log.e(TAG, "SSL error on public host $url: ${error?.primaryError} (拒绝)")
+                        handler?.cancel()
+                        lastLoadError = "SSL 证书校验失败 (已拒绝)"
+                    }
                 }
             }
             webChromeClient = object : WebChromeClient() {
@@ -414,33 +424,11 @@ class MainActivity : ComponentActivity() {
 
     private fun isSetupVisible(): Boolean = setupContainer.visibility == View.VISIBLE
 
-    private fun normalizeUrl(rawUrl: String): String {
-        val trimmed = rawUrl.trim()
-        if (trimmed.isEmpty()) {
-            return ""
-        }
+    private fun normalizeUrl(rawUrl: String): String = UrlNormalizer.normalize(rawUrl)
 
-        val withScheme = if (
-            trimmed.startsWith("http://", ignoreCase = true) ||
-            trimmed.startsWith("https://", ignoreCase = true)
-        ) {
-            trimmed
-        } else {
-            "https://$trimmed"
-        }
+    private fun isValidUrl(url: String): Boolean = UrlNormalizer.isValid(url)
 
-        return withScheme.removeSuffix("/")
-    }
-
-    private fun isValidUrl(url: String): Boolean {
-        if (url.isBlank()) {
-            return false
-        }
-
-        val uri = Uri.parse(url)
-        val scheme = uri.scheme?.lowercase()
-        return (scheme == "http" || scheme == "https") && !uri.host.isNullOrBlank()
-    }
+    private fun isPrivateNetworkUrl(url: String): Boolean = UrlNormalizer.isPrivateNetworkUrl(url)
 
 
     // ============================================================
@@ -580,12 +568,15 @@ class MainActivity : ComponentActivity() {
 
     /**
      * 判断是否电视设备 (非手机)。TV 上默认使用原生电视墙。
+     *
+     * 注意: UI_MODE_SERVICE 返回的是 UiModeManager, 不是 Configuration ——
+     * 之前这里 cast 成 Configuration, 运行时必然 ClassCastException 被 catch 吞掉,
+     * 导致 isTvDevice() 永远返回 false。直接读 resources.configuration 才对。
      */
     private fun isTvDevice(): Boolean {
         return try {
-            val uiMode = getSystemService(android.content.Context.UI_MODE_SERVICE)
-                as android.content.res.Configuration
-            uiMode.uiMode and android.content.res.Configuration.UI_MODE_TYPE_MASK ==
+            val uiMode = resources.configuration.uiMode
+            uiMode and android.content.res.Configuration.UI_MODE_TYPE_MASK ==
                 android.content.res.Configuration.UI_MODE_TYPE_TELEVISION
         } catch (e: Exception) {
             false

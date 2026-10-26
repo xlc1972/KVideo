@@ -1,7 +1,7 @@
 import java.io.File
 
 plugins {
-    id("com.android.application") version "8.2.0"
+    id("com.android.application") version "8.2.2"
     id("org.jetbrains.kotlin.android") version "1.9.22"
 }
 
@@ -20,8 +20,8 @@ android {
         applicationId = "com.djjk.ziqidonglai.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 24
-        versionName = "4.9.24"
+        versionCode = 25
+        versionName = "4.9.25"
 
         buildConfigField("String", "DEFAULT_KVIDEO_URL", "\"$defaultKVideoUrl\"")
     }
@@ -99,6 +99,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // ---- 单元测试 ----
+    testImplementation("junit:junit:4.13.2")
+    // org.json 在单元测试 (JVM) 下是桩实现, 需要真实实现才能测 DoubanParser
+    testImplementation("org.json:json:20231013")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     // 锁定 Compose 1.6.8: 避免被传递依赖 (activity-compose / coil) 拉高到 1.10+
     // 拉高会要求 compileSdk 35 + AGP 8.6, 本项目工具链是 AGP 8.2 / compileSdk 34。

@@ -23,37 +23,6 @@ interface UseAutoSkipProps {
  * Skip outro: When (duration - currentTime) <= skipOutroSeconds, trigger next episode
  * Auto next: When video ends, auto-advance to next episode if enabled
  */
-/**
- * Applies a skip-flag update outside of the component body.
- * Keeping the update in a module-level helper lets the React Compiler treat it as an
- * opaque call rather than a synchronous setState inside an effect body.
- */
-type SkipFlags = {
-    hasSkippedIntro: boolean;
-    hasTriggeredOutroSkip: boolean;
-    isOutroActive: boolean;
-};
-
-/**
- * Sets the "transitioning to next episode" flag from outside the component body so that the
- * React Compiler does not treat the call as a synchronous setState inside an effect.
- */
-function setTransitioning(setter: React.Dispatch<React.SetStateAction<boolean>>, value: boolean) {
-    setter(value);
-}
-
-function updateSkipFlags(
-    setFlags: React.Dispatch<React.SetStateAction<SkipFlags>>,
-    patch: Partial<SkipFlags>,
-) {
-    // Keep the previous object when nothing actually changes so that React can bail out of
-    // the re-render, exactly like a plain `setState(sameValue)` would.
-    setFlags((flags) => {
-        const changed = (Object.keys(patch) as (keyof SkipFlags)[]).some((key) => flags[key] !== patch[key]);
-        return changed ? { ...flags, ...patch } : flags;
-    });
-}
-
 export function useAutoSkip({
     videoRef,
     currentTime,
@@ -82,23 +51,6 @@ export function useAutoSkip({
     const hasTriggeredOutroSkipRef = useRef(false);
     // Track if we're transitioning to next episode (for custom loading indicator)
     const [isTransitioningToNextEpisode, setIsTransitioningToNextEpisode] = useState(false);
-    // The skip flags and the outro-zone flag are stored per source so that they reset
-    // automatically when the source changes. The reset is derived during render instead of
-    // being applied with setState inside an effect, which would cause a cascading render.
-    // `flagsSrc` remembers which source the flags below belong to.
-    const [flagsSrc, setFlagsSrc] = useState(src);
-    const [skipFlags, setSkipFlags] = useState({
-        hasSkippedIntro: false,
-        hasTriggeredOutroSkip: false,
-        isOutroActive: false,
-    });
-    if (flagsSrc !== src) {
-        setFlagsSrc(src);
-        setSkipFlags({ hasSkippedIntro: false, hasTriggeredOutroSkip: false, isOutroActive: false });
-    }
-    const hasSkippedIntro = skipFlags.hasSkippedIntro;
-    const hasTriggeredOutroSkip = skipFlags.hasTriggeredOutroSkip;
-    const isOutroActive = skipFlags.isOutroActive;
 
     // Reset flags when video source changes
     useEffect(() => {
@@ -127,7 +79,9 @@ export function useAutoSkip({
     }, [videoRef]);
 
     // Keep a stable ref to onNextEpisode to avoid effect re-runs.
-    // Declared before every consumer so that no code reads it before it is initialised.
+    // Declared before every consumer: the original code read `onNextEpisodeRef.current`
+    // inside `canAdvanceToNext` while the ref was still declared further down the file,
+    // which is a temporal-dead-zone hazard.
     const onNextEpisodeRef = useRef<(() => void) | undefined>(undefined);
     useEffect(() => {
         // Copy the hook argument into a local before writing it to the ref: the React
@@ -172,7 +126,7 @@ export function useAutoSkip({
         console.log(`[AutoSkip] Triggering next episode via ${reason}`);
         lastHandledSrcRef.current = src;
         // Set transitioning state for custom loading indicator
-        setTransitioning(setIsTransitioningToNextEpisode, true);
+        setIsTransitioningToNextEpisode(true);
         onNextEpisodeRef.current();
     }, [src, isTransitioningToNextEpisode]);
 
@@ -186,15 +140,14 @@ export function useAutoSkip({
         return !isNaN(currentTime) && isFinite(currentTime);
     }, [currentTime]);
 
-    // Handle intro skip. Returns true when the intro was skipped, so that callers can
-    // update the exposed state without this callback having to call setState itself.
+    // Handle intro skip
     const attemptIntroSkip = useCallback(() => {
-        if (!autoSkipIntro || skipIntroSeconds <= 0) return false;
-        if (!isDurationValid() || !isTimeValid()) return false;
-        if (hasSkippedIntroRef.current) return false;
+        if (!autoSkipIntro || skipIntroSeconds <= 0) return;
+        if (!isDurationValid() || !isTimeValid()) return;
+        if (hasSkippedIntroRef.current) return;
 
         const video = videoRef.current;
-        if (!video) return false;
+        if (!video) return;
 
         // Only skip if we're in the intro zone (between 0 and skipIntroSeconds)
         if (currentTime >= 0 && currentTime < skipIntroSeconds && currentTime < duration) {
@@ -202,17 +155,13 @@ export function useAutoSkip({
                 console.log(`[AutoSkip] Jumping from ${currentTime}s to intro skip point ${skipIntroSeconds}s`);
                 video.currentTime = Math.min(skipIntroSeconds, duration - 1);
                 hasSkippedIntroRef.current = true;
-                return true;
             }
         }
-        return false;
     }, [autoSkipIntro, skipIntroSeconds, currentTime, duration, isDurationValid, isTimeValid, videoRef]);
 
     // React to time changes for intro skip
     useEffect(() => {
-        if (attemptIntroSkip()) {
-            updateSkipFlags(setSkipFlags, { hasSkippedIntro: true });
-        }
+        attemptIntroSkip();
     }, [attemptIntroSkip]);
 
     // Also react to video getting ready for intro skip
@@ -221,8 +170,8 @@ export function useAutoSkip({
         if (!video) return;
 
         const handleReady = () => {
-            if (!hasSkippedIntroRef.current && attemptIntroSkip()) {
-                updateSkipFlags(setSkipFlags, { hasSkippedIntro: true });
+            if (!hasSkippedIntroRef.current) {
+                attemptIntroSkip();
             }
         };
 
@@ -237,7 +186,6 @@ export function useAutoSkip({
     // Handle outro skip (based on remaining time)
     useEffect(() => {
         if (!autoSkipOutro || skipOutroSeconds <= 0) {
-            updateSkipFlags(setSkipFlags, { isOutroActive: false });
             return;
         }
         if (!isDurationValid() || !isTimeValid()) return;
@@ -249,13 +197,11 @@ export function useAutoSkip({
         const inOutroZone = remainingTime > 0 && remainingTime <= skipOutroSeconds && currentTime > 0;
 
         if (inOutroZone) {
-            updateSkipFlags(setSkipFlags, { isOutroActive: true });
 
             // Only auto-trigger if video is actually playing
             if (isPlaying) {
                 console.log(`[AutoSkip] Outro detected: ${remainingTime.toFixed(1)}s remaining`);
                 hasTriggeredOutroSkipRef.current = true;
-                updateSkipFlags(setSkipFlags, { hasTriggeredOutroSkip: true });
 
                 // If we can advance to next episode, do it
                 if (autoNextEpisode && canAdvanceToNext()) {
@@ -270,7 +216,6 @@ export function useAutoSkip({
                 }
             }
         } else {
-            updateSkipFlags(setSkipFlags, { isOutroActive: false });
         }
     }, [autoSkipOutro, skipOutroSeconds, currentTime, duration, isPlaying, isDurationValid, isTimeValid, autoNextEpisode, canAdvanceToNext, triggerNextEpisode, videoRef]);
 
@@ -296,10 +241,11 @@ export function useAutoSkip({
         return () => video.removeEventListener('ended', handleVideoEnded);
     }, [videoRef, handleVideoEnded]);
 
+    // Only `isTransitioningToNextEpisode` is consumed by callers (DesktopVideoPlayer).
+    // The skip flags used to be returned as well, but reading a ref's `current`
+    // during render is not allowed (react-hooks/refs) and no caller read them,
+    // so they stay internal.
     return {
-        hasSkippedIntro,
-        hasTriggeredOutroSkip,
-        isOutroActive,
         isTransitioningToNextEpisode,
     };
 }

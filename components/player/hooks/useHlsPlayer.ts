@@ -11,6 +11,7 @@ import type {
 import { usePlayerSettings } from './usePlayerSettings';
 import { filterM3u8Ad } from '@/lib/utils/m3u8-utils';
 import { useRuntimeFeatures } from '@/components/RuntimeFeaturesProvider';
+import { tryNativePlayback } from '@/lib/utils/native-player-bridge';
 
 interface UseHlsPlayerProps {
     videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -37,6 +38,13 @@ export function useHlsPlayer({
     useEffect(() => {
         const video = videoRef.current;
         if (!video || !src) return;
+
+        // Android TV 壳: 优先交给原生 Media3 播放器 (老电视 WebView 播 HLS 容易黑屏)
+        // 桥不存在 (普通浏览器) 或 App 判定不可原生播时, 继续走下面的 WebView 流程。
+        if (tryNativePlayback(src)) {
+            console.info('[NativePlayer] handed off to Android native player');
+            return;
+        }
 
         // Cleanup previous HLS instance
         if (hlsRef.current) {
